@@ -1,0 +1,28 @@
+{
+  "name": "coot",
+  "version": "0.0.0-initial",
+  "description": "",
+  "author": "Alex Shnayder <alex@shnayder.pro>",
+  "repository": "alex-shnayder/coot",
+  "homepage": "https://github.com/alex-shnayder/coot#readme",
+  "bugs": "https://github.com/alex-shnayder/coot/issues",
+  "license": "ISC",
+  "keywords": [],
+  "scripts": {
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "main": "src/index.js",
+  "devDependencies": {
+    "eslint": "^4.7.1",
+    "eslint-plugin-import": "^2.7.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.2.1"
+  },
+  "dependencies": {}
+}
