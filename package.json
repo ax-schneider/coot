@@ -25,6 +25,9 @@
     "lint-staged": "^4.2.1"
   },
   "dependencies": {
+    "appache": "^0.2.0",
+    "appache-api-fluent": "^0.1.0",
+    "appache-cli": "^0.1.0",
     "strip-json-comments": "^2.0.1"
   }
 }
