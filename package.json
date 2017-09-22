@@ -24,5 +24,7 @@
     "husky": "^0.14.3",
     "lint-staged": "^4.2.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "strip-json-comments": "^2.0.1"
+  }
 }
