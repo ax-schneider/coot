@@ -1,16 +1,17 @@
 /* eslint-disable global-require, no-console */
 
 const Path = require('path')
+const Os = require('os')
 const appache = require('appache')
 const { InputError } = require('appache/common')
 const apiPlugin = require('appache-api-fluent')
 const cliPlugin = require('appache-cli')
-const readConfig = require('../src/readConfig')
-const init = require('./init')
-const { COOT_PATH, CONFIG_FILE } = require('./constants')
+const { CONFIG_FILE } = require('../src/constants')
+const { init, readConfig } = require('../src')
 
 
 const DEFAULT_CONFIG = readConfig(Path.join(__dirname, '..', 'src', 'config.json'))
+const COOT_PATH = Path.join(Os.homedir(), '.coot')
 
 
 let plugins = [apiPlugin, cliPlugin, '-unknownCommands']
