@@ -1,0 +1,6 @@
+{
+  "root": ".", // Root path relative to the working dir
+  "config": ["./coot.json"], // A glob or an array of globs of files to require and merge into config
+  "files": ["./**"], // A glob or an array of globs of files to copy into the root path
+  "handlers": ["./coot.handler.js"] // A glob or an array of globs of files to require and execute
+}
