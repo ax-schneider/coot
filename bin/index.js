@@ -17,11 +17,11 @@ const COOT_PATH = Path.join(Os.homedir(), '.coot')
 let plugins = [apiPlugin, cliPlugin, '-unknownCommands']
 let app = appache(plugins)('coot')
 
-app.option('coot-path', `Path to the coot dir (default: ${COOT_PATH})`)
+app.option('--coot-path, -p', `Path to the coot dir (default: ${COOT_PATH})`)
   .type('path')
   .defaultValue(COOT_PATH)
 
-app.option('coot-init', 'Initialize coot at coot-path')
+app.option('--coot-init, -i', 'Initialize coot at coot-path')
   .type('boolean')
 
 app.handle((options) => {
