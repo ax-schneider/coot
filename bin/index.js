@@ -1,51 +1,41 @@
-/* eslint-disable global-require, no-console */
+/* eslint-disable no-console */
 
 const Path = require('path')
-const Os = require('os')
 const appache = require('appache')
-const { InputError } = require('appache/common')
 const apiPlugin = require('appache-api-fluent')
 const cliPlugin = require('appache-cli')
-const { CONFIG_FILE } = require('../src/constants')
-const { init, readConfig } = require('../src')
+const Task = require('../src/Task')
+const { readConfig, mergeConfigs, resolveObjectPaths } = require('../src/utils')
+const defaultConfig = require('../src/config')
 
 
-const DEFAULT_CONFIG = readConfig(Path.join(__dirname, '..', 'src', 'config.json'))
-const COOT_PATH = Path.join(Os.homedir(), '.coot')
+const DEFAULT_PATH = '~/.coot'
+const USER_CONFIG_PATH = Path.join(DEFAULT_PATH, 'config.json')
 
 
 let plugins = [apiPlugin, cliPlugin, '-unknownCommands']
 let app = appache(plugins)('coot')
 
-app.option('--coot-path, -p', `Path to the coot dir (default: ${COOT_PATH})`)
+app
+  .description('The cute task runner')
+  .abstract()
+
+app.option('-c', `Path to a config file to merge with the one at ${USER_CONFIG_PATH}`)
   .type('path')
-  .defaultValue(COOT_PATH)
-
-app.option('--coot-init, -i', 'Initialize coot at coot-path')
-  .type('boolean')
-
-app.handle((options) => {
-  let { cootInit, cootPath } = options
-
-  if (cootInit) {
-    process.stdout.write(`Initializing coot at ${cootPath}...`)
-    init(cootPath, DEFAULT_CONFIG)
-    console.log(' ✔️')
-    return
-  }
-
-  throw new InputError('Please specify a task or use --coot-init')
-})
 
 app.tap((options) => {
-  let { cootInit, cootPath } = options
+  let { c: configPath } = options
+  let customConfig = (configPath) ? readConfig(configPath) : null
+  let config = mergeConfigs(defaultConfig, customConfig, options)
+  let userConfigDir = Path.dirname(USER_CONFIG_PATH)
+  return resolveObjectPaths(config, ['coot.tasks'], userConfigDir)
+})
 
-  if (cootInit) {
-    throw new InputError('--coot-init must be used without any tasks')
-  }
-
-  let configPath = Path.join(cootPath, CONFIG_FILE)
-  return readConfig(configPath)
+app.tapAndHandle('* **', (options, config, fullName) => {
+  let name = fullName[fullName.length - 1]
+  let taskPath = Task.resolve(config.coot.tasks, name)
+  let task = Task.load(taskPath, config, name)
+  task.execute(options)
 })
 
 app.start()
