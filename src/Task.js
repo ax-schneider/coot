@@ -1,8 +1,7 @@
 const { statSync } = require('fs')
-const appache = require('appache')
-const { optionsToObject } = require('appache/common')
-const { next } = require('appache/effects')
-const api = require('appache-api-fluent')
+const comanche = require('comanche')
+const { optionsToObject } = require('comanche/common')
+const { next } = require('comanche/effects')
 const { resolvePath, readConfig, mergeConfigs } = require('./utils')
 const defaultConfig = require('./config')
 
@@ -83,7 +82,7 @@ class Task {
 
     this.config = config
 
-    let command = appache([api])(name)
+    let command = comanche(name, ['-cli'])
     this._command = command
 
     // TODO: hookEnd the default handler for copying files
@@ -103,7 +102,13 @@ class Task {
       this._command.start()
     }
 
-    return this._command.execute(options)
+    if (options) {
+      options = Object.entries(options).map(([name, value]) => {
+        return { name, value }
+      })
+    }
+
+    return this._command.execute(null, options)
   }
 }
 

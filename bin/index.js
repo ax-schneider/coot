@@ -1,9 +1,7 @@
 /* eslint-disable no-console */
 
 const Path = require('path')
-const appache = require('appache')
-const apiPlugin = require('appache-api-fluent')
-const cliPlugin = require('appache-cli')
+const comanche = require('comanche')
 const Task = require('../src/Task')
 const { readConfig, mergeConfigs, resolveObjectPaths } = require('../src/utils')
 const defaultConfig = require('../src/config')
@@ -13,10 +11,10 @@ const DEFAULT_PATH = '~/.coot'
 const USER_CONFIG_PATH = Path.join(DEFAULT_PATH, 'config.json')
 
 
-let plugins = [apiPlugin, cliPlugin, '-unknownCommands']
-let app = appache(plugins)('coot')
+let app = comanche('coot')
 
 app
+  .restrict(false)
   .description('The cute task runner')
   .abstract()
 
