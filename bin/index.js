@@ -19,7 +19,8 @@ app
   .description('The cute task runner')
   .abstract()
 
-app.option('-c', `Path to a config file to merge with the one at ${USER_CONFIG_PATH}`)
+app.option('-c')
+  .description('Path to a config file relative to CWD')
   .type('path')
 
 app.tap((options) => {
