@@ -2,6 +2,7 @@
 
 const Path = require('path')
 const comanche = require('comanche')
+const { handleResult } = require('appache-cli')
 const Task = require('../src/Task')
 const { readConfig, mergeConfigs, resolveObjectPaths } = require('../src/utils')
 const defaultConfig = require('../src/config')
@@ -29,11 +30,12 @@ app.tap((options) => {
   return resolveObjectPaths(config, ['coot.tasks'], userConfigDir)
 })
 
-app.tapAndHandle('* **', (options, config, fullName) => {
+app.tapAndHandle('* **', function* (options, config, fullName) {
   let name = fullName[fullName.length - 1]
-  let taskPath = Task.resolve(config.coot.tasks, name)
-  let task = Task.load(taskPath, config, name)
-  task.execute(options)
+  let taskPath = yield Task.resolve(config.coot.tasks, name)
+  let task = yield Task.load(taskPath, config, name)
+  let result = yield task.execute(options)
+  handleResult(result)
 })
 
 app.start()
