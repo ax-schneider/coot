@@ -4,18 +4,17 @@ const Path = require('path')
 const comanche = require('comanche')
 const { handleResult } = require('appache-cli')
 const Task = require('../src/Task')
-const { readConfig, mergeConfigs, resolveObjectPaths } = require('../src/utils')
+const { resolvePath, readConfig, mergeConfigs } = require('../src/utils')
 const defaultConfig = require('../src/config')
 
 
-const DEFAULT_PATH = '~/.coot'
+const DEFAULT_PATH = resolvePath('~/.coot')
 const USER_CONFIG_PATH = Path.join(DEFAULT_PATH, 'config.json')
 
 
-let app = comanche('coot')
+let app = comanche('coot', ['-restrict'])
 
 app
-  .restrict(false)
   .description('The cute task runner')
   .abstract()
 
@@ -24,17 +23,30 @@ app.option('-c')
   .type('path')
 
 app.tap((options) => {
-  let { c: configPath } = options
-  let customConfig = (configPath) ? readConfig(configPath) : null
-  let config = mergeConfigs(defaultConfig, customConfig, options)
-  let userConfigDir = Path.dirname(USER_CONFIG_PATH)
-  return resolveObjectPaths(config, ['coot.tasks'], userConfigDir)
+  let userConfig = readConfig(USER_CONFIG_PATH)
+  let customConfig = (options.c) ? readConfig(options.c) : null
+  let config = mergeConfigs(defaultConfig, userConfig, customConfig)
+
+  if (!config.coot || !config.coot.tasks) {
+    throw new Error('A path to coot tasks must be defined in "coot.tasks"')
+  }
+
+  config.coot.tasks = resolvePath(DEFAULT_PATH, config.coot.tasks)
+  delete options.c
+
+  return { config, options }
 })
 
-app.tapAndHandle('* **', function* (options, config, fullName) {
+app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
+  let { config, options } = context
   let name = fullName[fullName.length - 1]
-  let taskPath = yield Task.resolve(config.coot.tasks, name)
-  let task = yield Task.load(taskPath, config, name)
+
+  config.task = config.task || {}
+  config.task.name = name
+  config.task.path = resolvePath(config.coot.tasks, name)
+  options = mergeConfigs(options, taskOptions)
+
+  let task = yield Task.load(config)
   let result = yield task.execute(options)
   handleResult(result)
 })
