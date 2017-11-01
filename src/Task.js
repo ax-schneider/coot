@@ -26,12 +26,14 @@ function makeHandler(fn, baseConfig) {
 
 
 class Task {
-  static load(path, config = defaultConfig, name) {
+  static load(config) {
+    config = mergeConfigs(config, defaultConfig)
+
     if (!config.task || !config.task.config) {
-      throw new Error('Task config file must be defined')
+      throw new Error('Task config file must be defined in "task.config"')
     }
 
-    let taskConfigPath = resolvePath(path, config.task.config)
+    let taskConfigPath = resolvePath(config.task.path, config.task.config)
     let taskConfig
 
     try {
@@ -39,32 +41,30 @@ class Task {
     } catch (err) {}
 
     if (taskConfig) {
-      if (!name) {
-        name = taskConfig.task.name
-      }
-
       config = mergeConfigs(config, taskConfig)
     }
 
-    if (typeof name !== 'string' || !name.length) {
-      throw new Error('Task name must be a non-empty string')
-    }
-
-    let task = new Task(name, config)
+    let task = new Task(config)
 
     // TODO: load task handlers and hook them
 
     return task
   }
 
-  constructor(name, config) {
+  constructor(config) {
     if (!config || typeof config !== 'object') {
       throw new Error('Task config must be an object')
     }
 
-    this.config = config
+    if (!config.task || !config.task.name) {
+      throw new Error('Task config must have a "task" object with a "name" property')
+    }
 
-    let command = comanche(name, ['-cli'])
+    this.config = config
+    this.name = config.task.name
+
+    let command = comanche(config.task.name, ['-cli', '-restrict'])
+    command.description(config.task.description)
     this._command = command
 
     // TODO: hookEnd the default handler for copying files
@@ -82,6 +82,7 @@ class Task {
   execute(options) {
     if (!this._started) {
       this._command.start()
+      this._started = true
     }
 
     if (options) {
