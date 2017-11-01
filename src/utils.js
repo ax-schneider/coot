@@ -30,6 +30,7 @@ function resolvePath(basePath, path) {
 }
 
 function readConfig(path) {
+  path = resolvePath(path)
   let isJson = (extname(path).toLowerCase() === '.json')
 
   if (isJson) {
