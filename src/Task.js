@@ -1,4 +1,3 @@
-const { statSync } = require('fs')
 const comanche = require('comanche')
 const { optionsToObject } = require('comanche/common')
 const { next } = require('comanche/effects')
@@ -27,23 +26,6 @@ function makeHandler(fn, baseConfig) {
 
 
 class Task {
-  static resolve(tasksPath, task) {
-    let path = resolvePath(tasksPath, task)
-
-    try {
-      let isDir = statSync(path).isDirectory()
-
-      if (!isDir) {
-        throw new Error(`${path} is not a directory`)
-      }
-    } catch (err) {
-      err.message = `Cannot resolve task "${task}": ${err.message}`
-      throw err
-    }
-
-    return path
-  }
-
   static load(path, config = defaultConfig, name) {
     if (!config.task || !config.task.config) {
       throw new Error('Task config file must be defined')
