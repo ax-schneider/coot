@@ -45,11 +45,18 @@ function readConfig(path) {
 function mergeConfigs(...configs) {
   return configs.reduce((result, config) => {
     if (config) {
-      let cootConfig = Object.assign({}, result.coot, config.coot)
-      let taskConfig = Object.assign({}, result.task, config.task)
+      let cootProperty = result.coot
+      let taskProperty = result.task
+
       Object.assign(result, config)
-      result.coot = cootConfig
-      result.task = taskConfig
+
+      if (cootProperty && config.coot) {
+        result.coot = Object.assign({}, cootProperty, config.coot)
+      }
+
+      if (taskProperty && config.task) {
+        result.task = Object.assign({}, taskProperty, config.task)
+      }
     }
     return result
   }, {})
