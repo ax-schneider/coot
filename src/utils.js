@@ -1,7 +1,6 @@
 const Os = require('os')
 const { extname, resolve, join } = require('path')
 const { readFileSync } = require('fs')
-const _ = require('lodash')
 const stripJsonComments = require('strip-json-comments')
 
 
@@ -42,35 +41,5 @@ function readConfig(path) {
   }
 }
 
-function mergeConfigs(...configs) {
-  return configs.reduce((result, config) => {
-    if (config) {
-      let cootProperty = result.coot
-      let taskProperty = result.task
 
-      Object.assign(result, config)
-
-      if (cootProperty && config.coot) {
-        result.coot = Object.assign({}, cootProperty, config.coot)
-      }
-
-      if (taskProperty && config.task) {
-        result.task = Object.assign({}, taskProperty, config.task)
-      }
-    }
-    return result
-  }, {})
-}
-
-function resolveObjectPaths(config, keys, basePath) {
-  config = _.cloneDeep(config)
-  keys.forEach((key) => {
-    let path = _.get(config, key)
-    let resolvedPath = resolvePath(basePath, path)
-    _.set(config, key, resolvedPath)
-  })
-  return config
-}
-
-
-module.exports = { resolvePath, readConfig, mergeConfigs, resolveObjectPaths }
+module.exports = { resolvePath, readConfig }
