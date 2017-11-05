@@ -1,4 +1,4 @@
 {
   "tasks": "./tasks",
-  "params": "./params.json"
+  "options": "./options.json"
 }

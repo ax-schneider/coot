@@ -23,7 +23,7 @@ function loadUserConfig(path) {
 }
 
 function resolveUserConfig(config) {
-  let { path, tasks, params } = config
+  let { path, tasks, options } = config
 
   if (!path) {
     throw new Error('The "path" property is required')
@@ -36,12 +36,12 @@ function resolveUserConfig(config) {
   config = Object.assign({}, config)
   config.tasks = resolvePath(path, tasks)
 
-  if (typeof params === 'string') {
-    let paramsPath = resolvePath(path, params)
+  if (typeof options === 'string') {
+    let optionsPath = resolvePath(path, options)
     try {
-      config.params = readConfig(paramsPath)
+      config.options = readConfig(optionsPath)
     } catch (err) {
-      config.params = {}
+      config.options = {}
     }
   }
 

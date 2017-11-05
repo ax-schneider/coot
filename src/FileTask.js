@@ -33,7 +33,7 @@ function loadTaskConfig(path) {
 }
 
 function resolveTaskConfig(config) {
-  let { path, handlers, params } = config
+  let { path, handlers, defaults } = config
 
   if (!path) {
     throw new Error('The "path" property is required')
@@ -53,9 +53,9 @@ function resolveTaskConfig(config) {
     })
   }
 
-  if (typeof params === 'string') {
-    let paramsPath = resolvePath(path, params)
-    config.params = readConfig(paramsPath)
+  if (typeof defaults === 'string') {
+    let defaultsPath = resolvePath(path, defaults)
+    config.defaults = readConfig(defaultsPath)
   }
 
   return config

@@ -5,17 +5,17 @@ const { next } = require('comanche/effects')
 
 function makeHandler(fn, taskConfig) {
   return function* taskHandler(_, command, context) {
-    let { params, args, result } = context
-    result = yield fn(params, taskConfig, ...args, result)
-    return yield next(_, command, { params, args, result })
+    let { options, args, result } = context
+    result = yield fn(options, taskConfig, ...args, result)
+    return yield next(_, command, { options, args, result })
   }
 }
 
 function* prepareHandleContext(_, command) {
-  let params = optionsToObject(command.options)
-  let args = params.args
-  delete params.args
-  let context = yield next(_, command, { params, args })
+  let options = optionsToObject(command.options)
+  let args = options.args
+  delete options.args
+  let context = yield next(_, command, { options, args })
   return context.result
 }
 
@@ -37,8 +37,8 @@ class Task {
     command.description(config.description)
     this.command = command
 
-    if (config.defaultParams) {
-      Object.entries(config.defaultParams).forEach(([key, value]) => {
+    if (config.defaults) {
+      Object.entries(config.defaults).forEach(([key, value]) => {
         let option = command.option(key)
 
         if (typeof value !== 'undefined') {
@@ -66,22 +66,22 @@ class Task {
     }, handler)
   }
 
-  execute(params, ...args) {
+  execute(options, ...args) {
     if (!this.hasStarted) {
       this.command.start()
       this.hasStarted = true
     }
 
-    if (params) {
-      params = Object.entries(params).map(([name, value]) => {
+    if (options) {
+      options = Object.entries(options).map(([name, value]) => {
         return { name, value }
       })
     } else {
-      params = []
+      options = []
     }
 
-    params.push({ name: 'args', value: args })
-    return this.command.execute(null, params)
+    options.push({ name: 'args', value: args })
+    return this.command.execute(null, options)
   }
 }
 
