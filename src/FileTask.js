@@ -1,4 +1,6 @@
+const { Stream, Transform } = require('stream')
 const { dirname, basename, extname } = require('path')
+const vfs = require('vinyl-fs')
 const { resolvePath, readConfig } = require('./utils')
 const Task = require('./Task')
 
@@ -84,6 +86,25 @@ class FileTask extends Task {
       .description('Destination path')
       .type('path')
       .defaultValue('.')
+  }
+
+  _makeHandlerArgs(command, result) {
+    if (Array.isArray(result)) {
+      return result.slice()
+    }
+
+    let files = (result instanceof Stream) ? result : command.files
+    let args = super._makeHandlerArgs(command)
+    args.unshift(files)
+    return args
+  }
+
+  _makeRequest(options) {
+    let request = super._makeRequest(options)
+    let { files } = this.config
+    let fileStream = files ? vfs.src(files) : new Transform()
+    request[0].files = fileStream
+    return request
   }
 }
 
