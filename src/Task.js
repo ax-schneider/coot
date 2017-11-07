@@ -77,14 +77,14 @@ class Task {
     }]
   }
 
-  execute(options) {
+  execute(...args) {
     return new Promise((resolve) => {
       if (!this.hasStarted) {
         this.command.start()
         this.hasStarted = true
       }
 
-      let request = this._makeRequest(options)
+      let request = this._makeRequest(...args)
       let result = this.command.execute(request)
       return resolve(result)
     })
