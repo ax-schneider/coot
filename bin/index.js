@@ -2,9 +2,9 @@
 
 const comanche = require('comanche')
 const { handleResult } = require('appache-cli')
-const FileTask = require('../src/FileTask')
 const { resolvePath } = require('../src/utils')
 const { loadUserConfig, resolveUserConfig } = require('./utils')
+const CliTask = require('./CliTask')
 const defaultConfig = require('./config.json')
 
 
@@ -28,8 +28,10 @@ app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
   let taskPath = resolvePath(config.tasks, name)
   options = Object.assign({}, options, taskOptions)
 
-  let task = yield FileTask.load(taskPath)
-  let result = yield task.execute(options, config)
+  let task = yield CliTask.load(taskPath)
+  task.cliConfig = config
+
+  let result = yield task.execute(options)
   handleResult(result)
 })
 
