@@ -25,6 +25,7 @@
     "lint-staged": "^4.2.1"
   },
   "dependencies": {
+    "appache-cli": "^0.3.0",
     "comanche": "^0.5.0",
     "gulp-change": "^1.0.0",
     "gulp-simple-rename": "^0.1.3",
