@@ -1,7 +1,6 @@
 const Os = require('os')
 const { extname, resolve, join } = require('path')
-const { readFileSync } = require('fs')
-const stripJsonComments = require('strip-json-comments')
+const requireJSON5 = require('require-json5')
 
 
 const HOME_DIR = Os.homedir()
@@ -33,8 +32,7 @@ function readConfig(path) {
   let isJson = (extname(path).toLowerCase() === '.json')
 
   if (isJson) {
-    let json = readFileSync(path, { encoding: 'utf8' })
-    return JSON.parse(stripJsonComments(json))
+    return requireJSON5(path)
   } else {
     // eslint-disable-next-line global-require
     return require(path)
