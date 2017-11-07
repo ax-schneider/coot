@@ -27,7 +27,7 @@ app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
   let { config, options } = context
   let name = fullName[fullName.length - 1]
   let taskPath = resolvePath(config.tasks, name)
-  options = Object.assign({}, options, taskOptions)
+  options = Object.assign({}, config.options, options, taskOptions)
 
   let task = yield CliTask.load(taskPath)
   task.cliConfig = config
