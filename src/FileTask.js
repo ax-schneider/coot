@@ -63,6 +63,14 @@ function resolveTaskConfig(config) {
   return config
 }
 
+function destHandler(files, options) {
+  return new Promise((resolve, reject) => {
+    files.pipe(vfs.dest(options.dest))
+      .on('end', resolve)
+      .on('error', reject)
+  })
+}
+
 
 class FileTask extends Task {
   static load(path) {
@@ -86,6 +94,11 @@ class FileTask extends Task {
       .description('Destination path')
       .type('path')
       .defaultValue('.')
+
+    this.command.lifecycle.hook({
+      event: 'handle',
+      goesAfter: ['handleCommand'],
+    }, this._makeHandler(destHandler))
   }
 
   _makeHandlerArgs(command, result) {
