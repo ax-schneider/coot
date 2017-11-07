@@ -82,7 +82,7 @@ class FileTask extends Task {
       throw new Error(`Unable to load task at ${path}`)
     }
 
-    return new FileTask(config)
+    return new this(config)
   }
 
   constructor(config) {
