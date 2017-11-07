@@ -114,8 +114,8 @@ class FileTask extends Task {
 
   _makeRequest(options) {
     let request = super._makeRequest(options)
-    let { files } = this.config
-    let fileStream = files ? vfs.src(files) : new Transform()
+    let { path, files } = this.config
+    let fileStream = files ? vfs.src(files, { cwd: path }) : new Transform()
     request[0].files = fileStream
     return request
   }
