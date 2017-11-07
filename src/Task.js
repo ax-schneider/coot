@@ -3,23 +3,6 @@ const { optionsToObject } = require('comanche/common')
 const { next } = require('comanche/effects')
 
 
-function makeHandler(fn, taskConfig) {
-  return function* taskHandler(_, command, context) {
-    let { options, args, result } = context
-    result = yield fn(options, taskConfig, ...args, result)
-    return yield next(_, command, { options, args, result })
-  }
-}
-
-function* prepareHandleContext(_, command) {
-  let options = optionsToObject(command.options)
-  let args = options.args
-  delete options.args
-  let context = yield next(_, command, { options, args })
-  return context.result
-}
-
-
 class Task {
   constructor(config) {
     if (!config || typeof config !== 'object') {
@@ -47,11 +30,24 @@ class Task {
         }
       })
     }
+  }
 
-    this.command.lifecycle.hook({
-      event: 'handle',
-      goesBefore: ['handleCommand'],
-    }, prepareHandleContext)
+  _makeHandlerArgs(command, result) {
+    if (Array.isArray(result)) {
+      return result.slice()
+    }
+
+    let options = optionsToObject(command.options)
+    return [options, this.config]
+  }
+
+  _makeHandler(fn) {
+    let self = this
+    return function* taskHandler(_, command, result) {
+      let args = self._makeHandlerArgs(command, result)
+      result = yield fn(...args)
+      return yield next(_, command, result)
+    }
   }
 
   handle(fn) {
@@ -59,19 +55,14 @@ class Task {
       throw new Error('A handler must be a function')
     }
 
-    let handler = makeHandler(fn, this.config)
+    let handler = this._makeHandler(fn)
     return this.command.lifecycle.hook({
       event: 'handle',
       tags: ['handleCommand'],
     }, handler)
   }
 
-  execute(options, ...args) {
-    if (!this.hasStarted) {
-      this.command.start()
-      this.hasStarted = true
-    }
-
+  _makeRequest(options) {
     if (options) {
       options = Object.entries(options).map(([name, value]) => {
         return { name, value }
@@ -80,8 +71,20 @@ class Task {
       options = []
     }
 
-    options.push({ name: 'args', value: args })
-    return this.command.execute(null, options)
+    return [{
+      fullName: this.command.getFullName(),
+      options,
+    }]
+  }
+
+  execute(options) {
+    if (!this.hasStarted) {
+      this.command.start()
+      this.hasStarted = true
+    }
+
+    let request = this._makeRequest(options)
+    return this.command.execute(request)
   }
 }
 
