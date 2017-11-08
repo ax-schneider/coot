@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const template = require('lodash.template')
 const change = require('gulp-change')
 const rename = require('gulp-simple-rename')
@@ -12,7 +14,9 @@ function templateHandler(files, options) {
 }
 
 function conflictHandler(files, options) {
-  return files.pipe(conflict(options.dest))
+  return files.pipe(conflict(options.dest, {
+    logger: () => {},
+  }))
 }
 
 
@@ -43,6 +47,11 @@ class CliTask extends FileTask {
     let args = super._makeHandlerArgs(command, result)
     args.push(this.cliConfig)
     return args
+  }
+
+  execute(...args) {
+    console.log(`Running ${this.name}...`)
+    return super.execute(...args)
   }
 }
 
