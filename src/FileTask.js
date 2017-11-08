@@ -111,6 +111,7 @@ class FileTask extends Task {
 
     this.command.lifecycle.hook({
       event: 'handle',
+      tags: ['handleCommand'],
       goesAfter: ['handleCommand'],
     }, this._makeHandler(destHandler))
   }
