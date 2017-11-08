@@ -3,9 +3,7 @@ const { dirname, basename, extname } = require('path')
 const vfs = require('vinyl-fs')
 const { resolvePath, readConfig } = require('./utils')
 const Task = require('./Task')
-
-
-const TASK_CONFIG_FILE = 'coot.config.json'
+const defaultConfig = require('./fileTaskConfig')
 
 
 function loadTaskConfig(path) {
@@ -14,7 +12,7 @@ function loadTaskConfig(path) {
   if (isPathToFile) {
     path = resolvePath(path)
   } else {
-    path = resolvePath(path, TASK_CONFIG_FILE)
+    path = resolvePath(path, defaultConfig.config)
   }
 
   let configDir = dirname(path)
@@ -41,29 +39,36 @@ function loadTaskConfig(path) {
 }
 
 function resolveTaskConfig(config) {
+  config = Object.assign({}, defaultConfig, config)
   let { path, handlers, defaults } = config
 
   if (!path) {
     throw new Error('The "path" property is required')
   }
 
-  config = Object.assign({}, config)
-
   if (config.config) {
     config.config = resolvePath(path, config.config)
   }
 
   if (handlers) {
-    config.handlers = handlers.map((handlerPath) => {
+    config.handlers = []
+    handlers.forEach((handlerPath) => {
       /* eslint-disable global-require */
       handlerPath = resolvePath(path, handlerPath)
-      return require(handlerPath)
+
+      try {
+        let handler = require(handlerPath)
+        config.handlers.push(handler)
+      } catch (err) {}
     })
   }
 
   if (typeof defaults === 'string') {
     let defaultsPath = resolvePath(path, defaults)
-    config.defaults = readConfig(defaultsPath)
+
+    try {
+      config.defaults = readConfig(defaultsPath)
+    } catch (err) {}
   }
 
   return config
