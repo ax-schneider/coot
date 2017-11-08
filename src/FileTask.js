@@ -6,7 +6,7 @@ const Task = require('./Task')
 const defaultConfig = require('./fileTaskConfig')
 
 
-function loadTaskConfig(path) {
+function loadFileTaskConfig(path) {
   let isPathToFile = Boolean(extname(path))
 
   if (isPathToFile) {
@@ -38,9 +38,9 @@ function loadTaskConfig(path) {
   return config
 }
 
-function resolveTaskConfig(config) {
+function resolveFileTaskConfig(config) {
   config = Object.assign({}, defaultConfig, config)
-  let { path, handlers, defaults } = config
+  let { path, handlers, options } = config
 
   if (!path) {
     throw new Error('The "path" property is required')
@@ -63,12 +63,20 @@ function resolveTaskConfig(config) {
     })
   }
 
-  if (typeof defaults === 'string') {
-    let defaultsPath = resolvePath(path, defaults)
+  if (typeof options === 'string') {
+    let optionsPath = resolvePath(path, options)
 
     try {
-      config.defaults = readConfig(defaultsPath)
-    } catch (err) {}
+      config.options = readConfig(optionsPath)
+    } catch (err) {
+      config.options = {}
+    }
+  }
+
+  config.options.dest = {
+    description: 'Destination path',
+    type: 'path',
+    defaultValue: '.',
   }
 
   return config
@@ -88,7 +96,7 @@ class FileTask extends Task {
     let config
 
     try {
-      config = loadTaskConfig(path)
+      config = loadFileTaskConfig(path)
     } catch (err) {
       throw new Error(`Unable to load task at ${path}`)
     }
@@ -97,14 +105,9 @@ class FileTask extends Task {
   }
 
   constructor(config) {
-    config = resolveTaskConfig(config)
+    config = resolveFileTaskConfig(config)
 
     super(config)
-
-    this.command.option('dest, d')
-      .description('Destination path')
-      .type('path')
-      .defaultValue('.')
 
     this.command.lifecycle.hook({
       event: 'handle',

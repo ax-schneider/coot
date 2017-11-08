@@ -3,15 +3,47 @@ const { optionsToObject } = require('comanche/common')
 const { next } = require('comanche/effects')
 
 
+function resolveConfigOptions(options) {
+  if (options && typeof options !== 'object') {
+    throw new Error('Task config options must be an object')
+  }
+
+  let result = {}
+
+  Object.entries(options).forEach(([name, value]) => {
+    if (value && typeof value === 'object') {
+      result[name] = value
+    } else {
+      let option = { defaultValue: value }
+      result[name] = option
+
+      if (typeof value !== 'undefined' && value !== null) {
+        option.type = typeof value
+      }
+    }
+  })
+
+  return result
+}
+
+function resolveTaskConfig(config) {
+  if (!config || typeof config !== 'object') {
+    throw new Error('Task config must be an object')
+  }
+
+  if (!config.name) {
+    throw new Error('Task config must have a name property')
+  }
+
+  config = Object.assign({}, config)
+  config.options = resolveConfigOptions(config.options)
+  return config
+}
+
+
 class Task {
   constructor(config) {
-    if (!config || typeof config !== 'object') {
-      throw new Error('Task config must be an object')
-    }
-
-    if (!config.name) {
-      throw new Error('Task config must have a name property')
-    }
+    config = resolveTaskConfig(config)
 
     this.config = config
     this.name = config.name
@@ -20,14 +52,12 @@ class Task {
     command.description(config.description)
     this.command = command
 
-    if (config.defaults) {
-      Object.entries(config.defaults).forEach(([key, value]) => {
-        let option = command.option(key)
-
-        if (typeof value !== 'undefined') {
-          option.defaultValue(value)
-          option.type(typeof value)
-        }
+    if (config.options) {
+      Object.entries(config.options).forEach(([optionName, optionConfig]) => {
+        command.option(optionName)
+          .description(optionConfig.description)
+          .defaultValue(optionConfig.defaultValue)
+          .type(optionConfig.type)
       })
     }
   }
