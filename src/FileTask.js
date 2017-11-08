@@ -18,8 +18,14 @@ function loadTaskConfig(path) {
   }
 
   let configDir = dirname(path)
-  let config = readConfig(path)
-  config.config = path
+  let config
+
+  try {
+    config = readConfig(path)
+    config.config = path
+  } catch (err) {
+    config = {}
+  }
 
   if (config.path) {
     config.path = resolvePath(configDir, config.path)
