@@ -33,6 +33,10 @@ app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
 
   let result = yield task.execute(options)
   handleResult(result)
+
+  return context
 })
+
+app.handle('* **', () => {})
 
 app.start()
