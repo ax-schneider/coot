@@ -5,7 +5,6 @@ const { handleResult } = require('appache-cli')
 const { resolvePath } = require('../src/utils')
 const { loadUserConfig, resolveUserConfig } = require('./utils')
 const CliTask = require('./CliTask')
-const templateHandler = require('./templateHandler')
 const defaultConfig = require('./config.json')
 
 
@@ -31,7 +30,6 @@ app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
 
   let task = yield CliTask.load(taskPath)
   task.cliConfig = config
-  task.handle(templateHandler)
 
   let result = yield task.execute(options)
   handleResult(result)
