@@ -17,7 +17,7 @@
       "git add"
     ]
   },
-  "main": "src/index.js",
+  "bin": "bin/index.js",
   "devDependencies": {
     "eslint": "^4.7.1",
     "eslint-plugin-import": "^2.7.0",

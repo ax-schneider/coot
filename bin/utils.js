@@ -1,5 +1,5 @@
 const { dirname, extname } = require('path')
-const { resolvePath, readConfig } = require('../src/utils')
+const { resolvePath, readConfig } = require('../lib/utils')
 
 
 const USER_CONFIG_FILE = 'config.json'

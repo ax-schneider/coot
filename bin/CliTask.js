@@ -2,7 +2,7 @@ const template = require('lodash.template')
 const change = require('gulp-change')
 const rename = require('gulp-simple-rename')
 const conflict = require('gulp-conflict')
-const FileTask = require('../src/FileTask')
+const FileTask = require('../lib/FileTask')
 
 
 function templateHandler(files, options) {
