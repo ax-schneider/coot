@@ -1,6 +1,0 @@
-{
-  "config": "coot.config.json",
-  "files": ["**", "!coot.*"],
-  "handlers": ["coot.handler"],
-  "options": "coot.options"
-}
