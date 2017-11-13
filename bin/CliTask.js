@@ -44,21 +44,27 @@ class CliTask extends FileTask {
       )
     }
 
-    let config
+    let config, configDir
 
     if (isDir) {
       let configPath = resolvePath(path, DEFAULT_CONFIG_PATH)
 
       try {
         config = readConfig(configPath)
-        config.config = configPath
+        configDir = dirname(configPath)
       } catch (err) {
         config = { name: basename(path) }
-        config.path = path
+        configDir = path
       }
     } else {
       config = readConfig(path)
-      config.config = path
+      configDir = dirname(path)
+    }
+
+    if (config.path) {
+      config.path = resolvePath(configDir, config.path)
+    } else {
+      config.path = configDir
     }
 
     return config
@@ -69,15 +75,11 @@ class CliTask extends FileTask {
 
     let { name, path, handlers, options } = config
 
-    if (config.config) {
-      config.config = resolvePath(config.config)
-      let configDir = dirname(config.config)
-      path = path ? resolvePath(configDir, path) : configDir
-    } else if (path) {
-      path = resolvePath(path)
-    } else {
-      throw new Error('Either "path" or "config" property is required')
+    if (!path) {
+      throw new Error('The path property is required')
     }
+
+    path = resolvePath(path)
 
     try {
       if (!statSync(path).isDirectory()) {
@@ -89,7 +91,7 @@ class CliTask extends FileTask {
       )
     }
 
-    if (!name && path) {
+    if (!name) {
       config.name = basename(path)
     }
 
