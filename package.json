@@ -18,6 +18,11 @@
     ]
   },
   "bin": "./bin/index.js",
+  "files": [
+    "bin",
+    "lib",
+    "index.js"
+  ],
   "devDependencies": {
     "eslint": "^4.7.1",
     "eslint-plugin-import": "^2.7.0",
