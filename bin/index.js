@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
 const comanche = require('comanche')
+const { InputError } = require('comanche/common')
 const { handleResult } = require('appache-cli')
 const { resolvePath } = require('../lib/utils')
 const { loadUserConfig, resolveUserConfig } = require('./utils')
@@ -15,10 +16,7 @@ let app = comanche('coot', ['-restrict'])
   .description('The cute task runner')
   .abstract()
 
-app.option('install, i')
-  .description('Save the task to the tasks dir before running it')
-  .type('boolean')
-  .shared()
+app.command('install, i', 'Save a task to the tasks dir')
 
 app.tap((options) => {
   let userConfig = loadUserConfig(USER_PATH)
@@ -28,25 +26,38 @@ app.tap((options) => {
   return { manager, config, options }
 })
 
+
+app
+  .handle('install', () => {
+    throw new InputError('Please specify a task to install')
+  })
+  .tap('install', (options, context) => {
+    context.mode = 'install'
+    return context
+  })
+
 app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
-  let { manager, config, options } = context
+  let { mode, manager, config, options } = context
+  let id = fullName[fullName.length - 1]
   options = Object.assign({}, config.options, options, taskOptions)
 
-  let id = fullName[fullName.length - 1]
-
-  // Ideally, the task option install/i would be the same as the global one,
-  // but option sharing in appache doesn't work for unknown commands,
-  // hence this check (would be just `if (options.install)` if it worked):
-  if (typeof options.install !== 'undefined' ||
-      typeof options.i !== 'undefined') {
-    id = yield manager.installTask(id)
+  // '* **' matches all commands, but install and alias are handled separately
+  if (fullName.length === 2 && ['install'].includes(id)) {
+    return context
   }
 
-  let task = yield manager.loadTask(id)
-  task.cliConfig = config
-
-  let result = yield task.execute(options)
-  handleResult(result)
+  if (mode === 'install') {
+    console.log(`Installing task "${id}"...`)
+    yield manager.installTask(id)
+  } else if (mode === 'alias') {
+    // TODO: alias
+  } else {
+    console.log(`Executing task "${id}"...`)
+    let task = yield manager.loadTask(id)
+    task.cliConfig = config
+    let result = yield task.execute(options)
+    handleResult(result)
+  }
 
   return context
 })
