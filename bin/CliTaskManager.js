@@ -3,7 +3,7 @@ const { resolvePath } = require('../lib/utils')
 const CliTask = require('./CliTask')
 
 
-class TaskManager {
+class CliTaskManager {
   constructor(tasksPath) {
     this.tasksPath = tasksPath
   }
@@ -24,4 +24,4 @@ class TaskManager {
 }
 
 
-module.exports = TaskManager
+module.exports = CliTaskManager

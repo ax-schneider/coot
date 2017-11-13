@@ -4,7 +4,7 @@ const comanche = require('comanche')
 const { handleResult } = require('appache-cli')
 const { resolvePath } = require('../lib/utils')
 const { loadUserConfig, resolveUserConfig } = require('./utils')
-const TaskManager = require('./TaskManager')
+const TaskManager = require('./CliTaskManager')
 const defaultConfig = require('./config.json')
 
 
