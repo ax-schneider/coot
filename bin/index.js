@@ -17,15 +17,8 @@ let app = comanche('coot')
     .default()
     .hidden()
     .type(null)
-  .tap((options) => {
-    let userConfig = loadUserConfig(USER_PATH)
-    let config = Object.assign(defaultConfig, userConfig)
-    config = resolveUserConfig(config)
-    let manager = new TaskManager(config.tasks)
-    return { manager, config, options }
-  })
 
-app.command('install, i')
+let install = app.command('install, i')
   .description('Save a task to the tasks dir')
   .version(false)
   .option('source, s')
@@ -37,12 +30,8 @@ app.command('install, i')
     .description('A name to save the task with')
     .type('string')
     .positional()
-  .handle(({ source }, { manager }) => {
-    console.log(`Installing task "${source}"...`)
-    return manager.installTask(source)
-  })
 
-app.command('run')
+let run = app.command('run')
   .description('Run a task')
   .default()
   .defaultCommand('coot.run')
@@ -53,11 +42,29 @@ app.command('run')
     .default()
     .hidden()
     .type(null)
+
+
+app
+  .tap((options) => {
+    let userConfig = loadUserConfig(USER_PATH)
+    let config = Object.assign(defaultConfig, userConfig)
+    config = resolveUserConfig(config)
+    let manager = new TaskManager(config.tasks)
+    return { manager, config, options }
+  })
+
+install
+  .handle(({ source }, { manager }) => {
+    console.log(`Installing task "${source}"...`)
+    return manager.installTask(source)
+  })
+
+run
   .tapAndHandle(function* (taskOptions, context, id) {
     let { manager, config, options } = context
     options = Object.assign({}, config.options, options, taskOptions)
 
-    console.log(`Executing task "${id}"...`)
+    console.log(`Running task "${id}"...`)
     let task = yield manager.loadTask(id)
     task.cliConfig = config
     yield task.execute(options)
@@ -65,5 +72,6 @@ app.command('run')
     return context
   })
   .handle(() => {})
+
 
 app.start()
