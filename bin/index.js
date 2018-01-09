@@ -1,8 +1,6 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, indent */
 
 const comanche = require('comanche')
-const { InputError } = require('comanche/common')
-const { handleResult } = require('appache-cli')
 const { resolvePath } = require('../lib/utils')
 const { loadUserConfig, resolveUserConfig } = require('./utils')
 const TaskManager = require('./CliTaskManager')
@@ -12,56 +10,60 @@ const defaultConfig = require('./config.json')
 const USER_PATH = resolvePath('~/.coot')
 
 
-let app = comanche('coot', ['-restrict'])
+let app = comanche('coot')
   .description('The cute task runner')
   .abstract()
-
-app.command('install, i', 'Save a task to the tasks dir')
-
-app.tap((options) => {
-  let userConfig = loadUserConfig(USER_PATH)
-  let config = Object.assign(defaultConfig, userConfig)
-  config = resolveUserConfig(config)
-  let manager = new TaskManager(config.tasks)
-  return { manager, config, options }
-})
-
-
-app
-  .handle('install', () => {
-    throw new InputError('Please specify a task to install')
-  })
-  .tap('install', (options, context) => {
-    context.mode = 'install'
-    return context
+  .option('default')
+    .default()
+    .hidden()
+    .type(null)
+  .tap((options) => {
+    let userConfig = loadUserConfig(USER_PATH)
+    let config = Object.assign(defaultConfig, userConfig)
+    config = resolveUserConfig(config)
+    let manager = new TaskManager(config.tasks)
+    return { manager, config, options }
   })
 
-app.tapAndHandle('* **', function* (taskOptions, context, fullName) {
-  let { mode, manager, config, options } = context
-  let id = fullName[fullName.length - 1]
-  options = Object.assign({}, config.options, options, taskOptions)
+app.command('install, i')
+  .description('Save a task to the tasks dir')
+  .version(false)
+  .option('source, s')
+    .description('A local path or a git URL of the task to be installed')
+    .type('string')
+    .required()
+    .positional()
+  .option('name, n')
+    .description('A name to save the task with')
+    .type('string')
+    .positional()
+  .handle(({ source }, { manager }) => {
+    console.log(`Installing task "${source}"...`)
+    return manager.installTask(source)
+  })
 
-  // '* **' matches all commands, but install and alias are handled separately
-  if (fullName.length === 2 && ['install'].includes(id)) {
-    return context
-  }
+app.command('run')
+  .description('Run a task')
+  .default()
+  .defaultCommand('coot.run')
+  .version(false)
+  .help(false)
+  .hidden()
+  .option('default')
+    .default()
+    .hidden()
+    .type(null)
+  .tapAndHandle(function* (taskOptions, context, id) {
+    let { manager, config, options } = context
+    options = Object.assign({}, config.options, options, taskOptions)
 
-  if (mode === 'install') {
-    console.log(`Installing task "${id}"...`)
-    yield manager.installTask(id)
-  } else if (mode === 'alias') {
-    // TODO: alias
-  } else {
     console.log(`Executing task "${id}"...`)
     let task = yield manager.loadTask(id)
     task.cliConfig = config
-    let result = yield task.execute(options)
-    handleResult(result)
-  }
+    yield task.execute(options)
 
-  return context
-})
-
-app.handle('* **', () => {})
+    return context
+  })
+  .handle(() => {})
 
 app.start()

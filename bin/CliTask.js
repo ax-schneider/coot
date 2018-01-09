@@ -143,13 +143,13 @@ class CliTask extends FileTask {
     this.cliConfig = cliConfig
 
     this.command.lifecycle.hook({
-      event: 'handle',
+      event: 'dispatch',
       tags: ['handleCommand'],
       goesAfter: ['handleCommand'],
     }, this._makeHandler(conflictHandler))
 
     this.command.lifecycle.hook({
-      event: 'handle',
+      event: 'dispatch',
       tags: ['handleCommand'],
       goesAfter: ['handleCommand'],
     }, this._makeHandler(templateHandler))
