@@ -2,7 +2,6 @@ const { tmpdir } = require('os')
 const Path = require('path')
 const { pathExists, copy, emptyDir } = require('fs-extra')
 const downloadGitRepo = require('download-git-repo')
-const nanoid = require('nanoid/generate')
 const { resolvePath } = require('../lib/utils')
 const CliTask = require('./CliTask')
 
@@ -10,19 +9,20 @@ const CliTask = require('./CliTask')
 const TEMP_PATH = resolvePath(tmpdir(), 'coot')
 
 
-function generateTempFolderName() {
-  // The default alphabet is not compatible with appache's command names
-  return nanoid('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)
-}
-
-function determineIdType(id) {
-  if (/^[a-zA-Z0-9_-]+$/.test(id)) {
+function determineSourceType(source) {
+  if (source instanceof CliTask) {
+    return 'task'
+  } else if (source && typeof source === 'object') {
+    return 'config'
+  } else if (/^[a-zA-Z0-9_-]+$/.test(source)) {
     return 'name'
-  } else if (/^([a-zA-Z]:|[a-zA-Z]:[/\\]|\/|\.|~).*/.test(id)) {
+  } else if (/^([a-zA-Z]:|[a-zA-Z]:[/\\]|\/|\.|~).*/.test(source)) {
     return 'path'
-  } else {
+  } else if (typeof source === 'string') {
     return 'git'
   }
+
+  throw new Error(`Unable to determing the source type of "${source}"`)
 }
 
 function normalizeGitUrl(url) {
@@ -34,15 +34,15 @@ function normalizeGitUrl(url) {
   return url
 }
 
-function getNameFromGitUrl(id) {
+function getNameFromGitUrl(url) {
   let regexp = /^((github|gitlab|bitbucket):)?((.+):)?([^/]+)\/([^#]+)(#(.+))?$/
-  let matches = regexp.exec(normalizeGitUrl(id))
+  let matches = regexp.exec(normalizeGitUrl(url))
   return matches[6]
 }
 
 function downloadFromGit(src) {
   return new Promise((resolve, reject) => {
-    let dest = Path.join(TEMP_PATH, generateTempFolderName())
+    let dest = Path.join(TEMP_PATH, getNameFromGitUrl(src))
     src = normalizeGitUrl(src)
 
     return downloadGitRepo(src, dest, (err) => {
@@ -57,62 +57,55 @@ class CliTaskManager {
     this.tasksPath = tasksPath
   }
 
+  loadTask(source, ...args) {
+    return new Promise((resolve) => {
+      let type = determineSourceType(source)
+      let path, config
+
+      if (type === 'config') {
+        config = source
+      } else if (type === 'task') {
+        config = source.config
+      } else if (type === 'git') {
+        config = downloadFromGit(source)
+          .then((path) => CliTask.loadConfig(path))
+      } else if (type === 'name') {
+        path = resolvePath(this.tasksPath, source)
+        config = CliTask.loadConfig(path)
+      }
+
+      return resolve(config)
+    }).then((config) => {
+      return new CliTask(config, ...args)
+    })
+  }
+
   isTaskInstalled(name) {
     let path = resolvePath(this.tasksPath, name)
     return pathExists(path)
   }
 
-  resolveTask(id) {
-    return new Promise((resolve) => {
-      let type = determineIdType(id)
+  installTask(source, name) {
+    return this.loadTask(source)
+      .then((task) => {
+        let { path } = task.config
+        name = name || task.name
+        let newPath = resolvePath(this.tasksPath, name)
 
-      if (type === 'git') {
-        resolve(downloadFromGit(id))
-      } else if (type === 'name') {
-        resolve(resolvePath(this.tasksPath, id))
-      } else {
-        resolve(id)
-      }
-    })
-  }
-
-  saveTask(path, name) {
-    return new Promise((resolve, reject) => {
-      path = resolvePath(path)
-      let config = CliTask.loadConfig(path)
-      config = CliTask.resolveConfig(config)
-      name = name || config.name
-      let newPath = resolvePath(this.tasksPath, name)
-
-      if (path === newPath) {
-        return resolve(newPath)
-      }
-
-      this.isTaskInstalled(name)
-        .then((isInstalled) => {
-          if (isInstalled) {
-            // TODO: inquire for overwriting
-            return emptyDir(newPath)
-          }
-        })
-        .then(() => copy(path, newPath))
-        .then(() => resolve(newPath))
-        .catch(reject)
-    })
-  }
-
-  installTask(id, name) {
-    return this.resolveTask(id)
-      .then((path) => {
-        if (!name && determineIdType(id) === 'git') {
-          name = getNameFromGitUrl(id)
+        if (path === newPath) {
+          return newPath
         }
-        return this.saveTask(path, name)
-      })
-  }
 
-  loadTask(id) {
-    return this.resolveTask(id).then((path) => CliTask.load(path))
+        return this.isTaskInstalled(name)
+          .then((isInstalled) => {
+            if (isInstalled) {
+            // TODO: inquire for overwriting
+              return emptyDir(newPath)
+            }
+          })
+          .then(() => copy(path, newPath))
+          .then(() => newPath)
+      })
   }
 }
 
