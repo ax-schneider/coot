@@ -70,9 +70,8 @@ class CliTask extends FileTask {
     return config
   }
 
-  static resolveConfig(config) {
+  static normalizeConfig(config) {
     config = Object.assign({}, DEFAULT_CONFIG, config)
-
     let { name, path, handlers, options } = config
 
     if (!path) {
@@ -118,7 +117,7 @@ class CliTask extends FileTask {
       }
     }
 
-    config = super.resolveConfig(config)
+    config = super.normalizeConfig(config)
     config.path = path
     config.options.src.defaultValue = path
 
@@ -139,20 +138,7 @@ class CliTask extends FileTask {
 
   constructor(config, cliConfig) {
     super(config)
-
     this.cliConfig = cliConfig
-
-    this.command.lifecycle.hook({
-      event: 'dispatch',
-      tags: ['handleCommand'],
-      goesAfter: ['handleCommand'],
-    }, this._makeHandler(conflictHandler))
-
-    this.command.lifecycle.hook({
-      event: 'dispatch',
-      tags: ['handleCommand'],
-      goesAfter: ['handleCommand'],
-    }, this._makeHandler(templateHandler))
   }
 
   _makeHandlerArgs(command, result) {
@@ -164,11 +150,11 @@ class CliTask extends FileTask {
     args.push(this.cliConfig)
     return args
   }
-
-  execute(...args) {
-    return super.execute(...args)
-  }
 }
+
+CliTask.endHandlers = FileTask.endHandlers.concat(
+  conflictHandler, templateHandler
+)
 
 
 module.exports = CliTask
