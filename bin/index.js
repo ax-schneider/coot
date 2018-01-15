@@ -1,10 +1,11 @@
 /* eslint-disable no-console, indent */
 
+const { basename } = require('path')
 const comanche = require('comanche')
+const { Help } = require('comanche/common')
+const { handleResult } = require('appache-cli')
 const { resolvePath } = require('../lib/utils')
-const { loadUserConfig, resolveUserConfig } = require('./utils')
 const TaskManager = require('./CliTaskManager')
-const defaultConfig = require('./config.json')
 
 
 const USER_PATH = resolvePath('~/.coot')
@@ -13,6 +14,10 @@ const USER_PATH = resolvePath('~/.coot')
 let app = comanche('coot')
   .description('The cute task runner')
   .abstract()
+  .option('config, c')
+    .description('Path to the config file')
+    .type('path')
+    .defaultValue(USER_PATH)
   .option('default')
     .default()
     .hidden()
@@ -46,29 +51,31 @@ let run = app.command('run')
 
 app
   .tap((options) => {
-    let userConfig = loadUserConfig(USER_PATH)
-    let config = Object.assign(defaultConfig, userConfig)
-    config = resolveUserConfig(config)
-    let manager = new TaskManager(config.tasks)
-    return { manager, config, options }
+    let manager = TaskManager.load(options.config)
+    return { manager, options }
   })
 
 install
-  .handle(({ source }, { manager }) => {
-    console.log(`Installing task "${source}"...`)
-    return manager.installTask(source)
+  .handle(function* ({ source }, { manager }) {
+    console.log(`Installing "${source}"...`)
+    let path = yield manager.installTask(source)
+    console.log(`Successfully installed at ${path}`)
+    console.log(`Use "coot ${basename(path)}" to run the task`)
   })
 
 run
-  .tapAndHandle(function* (taskOptions, context, id) {
-    let { manager, config, options } = context
-    options = Object.assign({}, config.options, options, taskOptions)
+  .tapAndHandle(function* (taskOptions, context, source) {
+    let { manager, options } = context
+    options = Object.assign({}, options, taskOptions)
 
-    console.log(`Running task "${id}"...`)
-    let task = yield manager.loadTask(id)
-    task.cliConfig = config
-    yield task.execute(options)
+    console.log(`Running "${source}"...`)
+    let result = yield manager.runTask(source, options)
 
+    if (result instanceof Help) {
+      return result
+    }
+
+    handleResult(result.value, result.command)
     return context
   })
   .handle(() => {})

@@ -136,11 +136,6 @@ class CliTask extends FileTask {
     return new this(config)
   }
 
-  constructor(config, cliConfig) {
-    super(config)
-    this.cliConfig = cliConfig
-  }
-
   _makeHandlerArgs(command, result) {
     if (Array.isArray(result)) {
       return result.slice()
