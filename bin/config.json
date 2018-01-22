@@ -1,4 +1,4 @@
 {
-  "tasks": "./tasks",
+  "tasksDir": "./tasks",
   "options": "./options.json"
 }

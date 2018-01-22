@@ -1,52 +1,172 @@
-const { dirname, extname } = require('path')
+const Path = require('path')
+const { tmpdir } = require('os')
+const { pathExists, copy, emptyDir } = require('fs-extra')
+const downloadGitRepo = require('download-git-repo')
 const { resolvePath, readConfig } = require('../lib/utils')
+const CliTask = require('./CliTask')
+const DEFAULT_COOT_CONFIG = require('./config.json')
 
 
-const USER_CONFIG_FILE = 'config.json'
+const DEFAULT_COOT_DIR = resolvePath('~/.coot')
+const DEFAULT_COOT_CONFIG_PATH = resolvePath(DEFAULT_COOT_DIR, 'config.json')
+const TEMP_PATH = resolvePath(tmpdir(), 'coot')
 
 
-function loadUserConfig(path) {
-  let isPathToFile = Boolean(extname(path))
-
-  if (isPathToFile) {
-    path = resolvePath(path)
+function determineSourceType(source) {
+  if (/^[a-zA-Z0-9_-]+$/.test(source)) {
+    return 'name'
+  } else if (/^([a-zA-Z]:|[a-zA-Z]:[/\\]|\/|\.|~).*/.test(source)) {
+    return 'path'
   } else {
-    path = resolvePath(path, USER_CONFIG_FILE)
+    return 'git'
   }
-
-  let configDir = dirname(path)
-  let config = readConfig(path)
-  config.config = path
-  config.path = configDir
-
-  return config
 }
 
-function resolveUserConfig(config) {
-  let { path, tasks, options } = config
+function normalizeGitUrl(url) {
+  // download-git-repo doesn't understand simple github urls
+  if (url.startsWith('https://github.com/')) {
+    url = url.slice(19)
+  }
+
+  return url
+}
+
+function getNameFromGitUrl(url) {
+  let regexp = /^((github|gitlab|bitbucket):)?((.+):)?([^/]+)\/([^#]+)(#(.+))?$/
+  let matches = regexp.exec(normalizeGitUrl(url))
+  return matches[6]
+}
+
+function downloadFromGit(src) {
+  return new Promise((resolve, reject) => {
+    let dest = Path.join(TEMP_PATH, getNameFromGitUrl(src))
+    src = normalizeGitUrl(src)
+
+    return downloadGitRepo(src, dest, (err) => {
+      return err ? reject(err) : resolve(dest)
+    })
+  })
+}
+
+function normalizeConfig(config) {
+  config = Object.assign(DEFAULT_COOT_CONFIG, config)
+  let { path, tasksDir, options } = config
 
   if (!path) {
     throw new Error('The "path" property is required')
   }
 
-  if (!tasks) {
-    throw new Error('The "tasks" property is required')
+  if (!tasksDir) {
+    throw new Error('The "tasksDir" property is required')
   }
 
+  let configDir = Path.dirname(path)
+
   config = Object.assign({}, config)
-  config.tasks = resolvePath(path, tasks)
+  config.tasksDir = resolvePath(configDir, tasksDir)
 
   if (typeof options === 'string') {
-    let optionsPath = resolvePath(path, options)
-    try {
-      config.options = readConfig(optionsPath)
-    } catch (err) {
-      config.options = {}
-    }
+    config.options = resolvePath(configDir, options)
   }
 
   return config
 }
 
+function loadConfig(path = DEFAULT_COOT_CONFIG_PATH, normalize = true) {
+  let extension = Path.extname(path)
 
-module.exports = { loadUserConfig, resolveUserConfig }
+  if (extension !== '.json') {
+    throw new Error('The coot config must be a JSON file')
+  }
+
+  path = resolvePath(path)
+  let config = readConfig(path)
+  config.path = path
+
+  return normalize ? normalizeConfig(config) : config
+}
+
+function resolveTaskAlias(config, alias) {
+  let { aliases } = config
+
+  if (aliases && aliases[alias]) {
+    return resolveTaskAlias(aliases[alias])
+  } else {
+    return alias
+  }
+}
+
+function resolveTaskSource(config, source) {
+  return new Promise((resolve) => {
+    source = resolveTaskAlias(config, source)
+
+    let type = determineSourceType(source)
+
+    if (type === 'git') {
+      return resolve(downloadFromGit(source))
+    } else if (type === 'name') {
+      return resolve(resolvePath(config.tasksDir, source))
+    } else {
+      return resolve(source)
+    }
+  })
+}
+
+function normalizeTaskConfig(config) {
+  return CliTask.normalizeConfig(config)
+}
+
+function loadTaskConfig(path, normalize = true) {
+  return CliTask.loadConfig(path, normalize)
+}
+
+function loadTask(config, source) {
+  return resolveTaskSource(config, source)
+    .then((path) => CliTask.load(path))
+}
+
+function isTaskInstalled(config, name) {
+  return new Promise((resolve) => {
+    let path = resolvePath(config.tasksDir, name)
+    return resolve(pathExists(path))
+  })
+}
+
+function installTask(config, source, name) {
+  return loadTask(config, source)
+    .then((task) => {
+      let { path } = task.config
+      name = name || task.name
+      let newPath = resolvePath(config.tasksDir, name)
+
+      if (path === newPath) {
+        return newPath
+      }
+
+      return isTaskInstalled(config, name)
+        .then((isInstalled) => {
+          if (isInstalled) {
+          // TODO: inquire for overwriting
+            return emptyDir(newPath)
+          }
+        })
+        .then(() => copy(path, newPath))
+        .then(() => newPath)
+    })
+}
+
+function runTask(config, source, options) {
+  return loadTask(config, source)
+    .then((task) => {
+      options = Object.assign(config.options, options)
+      return task.run(options, config)
+    })
+}
+
+
+module.exports = {
+  DEFAULT_COOT_CONFIG, DEFAULT_COOT_DIR, DEFAULT_COOT_CONFIG_PATH,
+  normalizeConfig, loadConfig, resolveTaskAlias, resolveTaskSource,
+  loadTask, isTaskInstalled, loadTaskConfig, normalizeTaskConfig,
+  installTask, runTask,
+}

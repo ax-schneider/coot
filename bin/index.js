@@ -4,11 +4,9 @@ const { basename } = require('path')
 const comanche = require('comanche')
 const { Help } = require('comanche/common')
 const { handleResult } = require('appache-cli')
-const { resolvePath } = require('../lib/utils')
-const TaskManager = require('./CliTaskManager')
-
-
-const USER_PATH = resolvePath('~/.coot')
+const {
+  DEFAULT_COOT_CONFIG_PATH, loadConfig, installTask, runTask,
+} = require('./utils')
 
 
 let app = comanche('coot')
@@ -17,7 +15,7 @@ let app = comanche('coot')
   .option('config, c')
     .description('Path to the config file')
     .type('path')
-    .defaultValue(USER_PATH)
+    .defaultValue(DEFAULT_COOT_CONFIG_PATH)
   .option('default')
     .default()
     .hidden()
@@ -51,25 +49,25 @@ let run = app.command('run')
 
 app
   .tap((options) => {
-    let manager = TaskManager.load(options.config)
-    return { manager, options }
+    let config = loadConfig(options.config)
+    return { config, options }
   })
 
 install
-  .handle(function* ({ source }, { manager }) {
+  .handle(function* ({ source }, { config }) {
     console.log(`Installing "${source}"...`)
-    let path = yield manager.installTask(source)
+    let path = yield installTask(config, source)
     console.log(`Successfully installed at ${path}`)
     console.log(`Use "coot ${basename(path)}" to run the task`)
   })
 
 run
   .tapAndHandle(function* (taskOptions, context, source) {
-    let { manager, options } = context
+    let { config, options } = context
     options = Object.assign({}, options, taskOptions)
 
     console.log(`Running "${source}"...`)
-    let result = yield manager.runTask(source, options)
+    let result = yield runTask(config, source, options)
 
     if (result instanceof Help) {
       return result

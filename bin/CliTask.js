@@ -1,20 +1,24 @@
 /* eslint-disable no-console */
 
-const { dirname, basename } = require('path')
-const { statSync } = require('fs')
+const fs = require('fs')
+const Path = require('path')
 const template = require('lodash.template')
 const change = require('gulp-change')
 const rename = require('gulp-simple-rename')
 const conflict = require('gulp-conflict')
-const { resolvePath, readConfig } = require('../lib/utils')
+const normalizePackageData = require('normalize-package-data')
+const readPackageJson = require('read-package-json')
+const { resolvePath } = require('../lib/utils')
 const FileTask = require('../lib/FileTask')
 
 
-const DEFAULT_CONFIG_PATH = 'coot.config.json'
 const DEFAULT_CONFIG = {
-  files: ['**', '!coot.*'],
-  handlers: ['coot.handler'],
-  options: 'coot.options',
+  // npm's defaults for files
+  files: [
+    '**', '!._*', '!package.json', '!.git', '!CVS', '!.svn', '!.hg', '!.*.swp',
+    '!.lock-wscript', '!.wafpickle-N', '!node_modules', '!npm-debug.log',
+    '!.DS_Store', '!.npmrc', '!config.gypi', '!*.orig', '!package-lock.json',
+  ],
 }
 
 
@@ -32,108 +36,75 @@ function conflictHandler(files, options) {
 
 
 class CliTask extends FileTask {
-  static loadConfig(path) {
-    let isDir
-    path = resolvePath(path)
+  static loadConfig(path, normalize = true) {
+    return new Promise((resolve, reject) => {
+      path = resolvePath(path)
 
-    try {
-      isDir = statSync(path).isDirectory()
-    } catch (err) {
-      throw new Error(
-        `Cannot load task config at ${path}: the path doesn't exist`
-      )
-    }
-
-    let config, configDir
-
-    if (isDir) {
-      let configPath = resolvePath(path, DEFAULT_CONFIG_PATH)
-
-      try {
-        config = readConfig(configPath)
-        configDir = dirname(configPath)
-      } catch (err) {
-        config = { name: basename(path) }
-        configDir = path
+      if (!fs.existsSync(path)) {
+        throw new Error(`Path ${path} doesn't exist`)
       }
-    } else {
-      config = readConfig(path)
-      configDir = dirname(path)
-    }
 
-    if (config.path) {
-      config.path = resolvePath(configDir, config.path)
-    } else {
-      config.path = configDir
-    }
+      let isDir = !Path.extname(path)
+      let basename = Path.basename(path)
+      let dir = path
 
-    return config
+      if (isDir) {
+        path = Path.join(path, 'package.json')
+      } else if (basename === 'package.json') {
+        dir = Path.dirname(path)
+      } else {
+        throw new Error(
+          'A task config path must be a directory or a package.json file, ' +
+          `given: ${path}`
+        )
+      }
+
+      readPackageJson(path, (err, data) => {
+        if (err && err.code !== 'ENOENT') {
+          return reject(err)
+        }
+
+        let config = data ? Object.assign({}, data) : {}
+        config.name = config.name || Path.basename(dir)
+        config.dir = dir
+
+        if (data) {
+          config.path = path
+        }
+
+        if (normalize) {
+          config = this.normalizeConfig(config)
+        }
+
+        return resolve(config)
+      })
+    })
   }
 
   static normalizeConfig(config) {
     config = Object.assign({}, DEFAULT_CONFIG, config)
-    let { name, path, handlers, options } = config
 
-    if (!path) {
-      throw new Error('The path property is required')
+    if (!config.dir) {
+      throw new Error('"dir" property is required in a task config')
     }
 
-    path = resolvePath(path)
-
-    try {
-      if (!statSync(path).isDirectory()) {
-        throw new Error()
-      }
-    } catch (err) {
-      throw new Error(
-        `Task path ${path} either doesn't exist or is not a directory`
-      )
-    }
-
-    if (!name) {
-      config.name = basename(path)
-    }
-
-    if (handlers) {
-      config.handlers = []
-      handlers.forEach((handlerPath) => {
-        /* eslint-disable global-require */
-        handlerPath = resolvePath(path, handlerPath)
-
-        try {
-          let handler = require(handlerPath)
-          config.handlers.push(handler)
-        } catch (err) {}
-      })
-    }
-
-    if (typeof options === 'string') {
-      let optionsPath = resolvePath(path, options)
-
-      try {
-        config.options = readConfig(optionsPath)
-      } catch (err) {
-        config.options = {}
-      }
-    }
-
+    normalizePackageData(config)
     config = super.normalizeConfig(config)
-    config.path = path
-    config.options.src.defaultValue = path
+    config.options.src.defaultValue = config.dir
 
     return config
   }
 
   static load(path) {
-    let config
-
-    try {
-      config = this.loadConfig(path)
-    } catch (err) {
-      throw new Error(`Unable to load task at ${path}`)
-    }
-
-    return new this(config)
+    return this.loadConfig(path, false)
+      .then(
+        (config) => {
+          return new this(config)
+        },
+        (err) => {
+          throw new Error(`Unable to load task at ${path}: ${err.message}`)
+        }
+      )
   }
 
   _makeHandlerArgs(command, result) {
