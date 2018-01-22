@@ -11,7 +11,6 @@ const {
 
 let app = comanche('coot')
   .description('The cute task runner')
-  .abstract()
   .option('config, c')
     .description('Path to the config file')
     .type('path')
@@ -56,6 +55,7 @@ app
     let config = loadConfig(options.config)
     return { config, options }
   })
+  .handle(() => new Help())
 
 install
   .handle(function* ({ source }, { config }) {
