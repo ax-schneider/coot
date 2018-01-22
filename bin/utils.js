@@ -1,3 +1,4 @@
+const fs = require('fs')
 const Path = require('path')
 const { tmpdir } = require('os')
 const { pathExists, copy, emptyDir } = require('fs-extra')
@@ -132,6 +133,16 @@ function isTaskInstalled(config, name) {
   })
 }
 
+function getInstalledTasks(config) {
+  return new Promise((resolve) => {
+    let tasks = fs.readdirSync(config.tasksDir).filter((entry) => {
+      let path = Path.join(config.tasksDir, entry)
+      return fs.statSync(path).isDirectory()
+    })
+    return resolve(tasks)
+  })
+}
+
 function installTask(config, source, name) {
   return loadTask(config, source)
     .then((task) => {
@@ -167,6 +178,6 @@ function runTask(config, source, options) {
 module.exports = {
   DEFAULT_COOT_CONFIG, DEFAULT_COOT_DIR, DEFAULT_COOT_CONFIG_PATH,
   normalizeConfig, loadConfig, resolveTaskAlias, resolveTaskSource,
-  loadTask, isTaskInstalled, loadTaskConfig, normalizeTaskConfig,
-  installTask, runTask,
+  loadTask, isTaskInstalled, getInstalledTasks, loadTaskConfig,
+  normalizeTaskConfig, installTask, runTask,
 }

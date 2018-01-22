@@ -5,7 +5,7 @@ const comanche = require('comanche')
 const { Help } = require('comanche/common')
 const { handleResult } = require('appache-cli')
 const {
-  DEFAULT_COOT_CONFIG_PATH, loadConfig, installTask, runTask,
+  DEFAULT_COOT_CONFIG_PATH, loadConfig, installTask, getInstalledTasks, runTask,
 } = require('./utils')
 
 
@@ -34,6 +34,10 @@ let install = app.command('install, i')
     .type('string')
     .positional()
 
+let list = app.command('list, l')
+  .description('List installed tasks')
+  .version(false)
+
 let run = app.command('run')
   .description('Run a task')
   .default()
@@ -59,6 +63,21 @@ install
     let path = yield installTask(config, source)
     console.log(`Successfully installed at ${path}`)
     console.log(`Use "coot ${basename(path)}" to run the task`)
+  })
+
+list
+  .handle(function* (options, { config }) {
+    let tasks = yield getInstalledTasks(config)
+    console.log()
+
+    if (tasks.length) {
+      console.log('Installed tasks:')
+      tasks.forEach((task) => console.log(`  ${task}`))
+    } else {
+      console.log('There are no installed tasks')
+    }
+
+    console.log()
   })
 
 run
