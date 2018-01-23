@@ -30,7 +30,6 @@
     "lint-staged": "^6.0.1"
   },
   "dependencies": {
-    "appache-cli": "^0.4.0",
     "comanche": "^0.6.0",
     "download-git-repo": "^1.0.2",
     "fs-extra": "^5.0.0",

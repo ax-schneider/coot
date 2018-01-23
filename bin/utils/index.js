@@ -174,18 +174,10 @@ function installTask(config, source, name) {
     })
 }
 
-function runTask(config, source, options) {
-  return loadTask(config, source)
-    .then((task) => {
-      options = Object.assign(config.options, options)
-      return task.run(options, config)
-    })
-}
-
 
 module.exports = {
   DEFAULT_COOT_CONFIG, DEFAULT_COOT_DIR, DEFAULT_COOT_CONFIG_PATH,
   normalizeConfig, loadConfig, resolveTaskAlias, resolveTaskSource,
   loadTask, isTaskInstalled, getInstalledTasks, loadTaskConfig,
-  normalizeTaskConfig, installTask, runTask,
+  normalizeTaskConfig, installTask,
 }

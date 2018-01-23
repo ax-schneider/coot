@@ -5,7 +5,8 @@ const comanche = require('comanche')
 const { Help } = require('comanche/common')
 const { handleResult } = require('appache-cli')
 const {
-  DEFAULT_COOT_CONFIG_PATH, loadConfig, installTask, getInstalledTasks, runTask,
+  DEFAULT_COOT_CONFIG_PATH, loadConfig, installTask, getInstalledTasks,
+  loadTask,
 } = require('./utils')
 
 
@@ -85,17 +86,15 @@ list
 
 run
   .tapAndHandle(function* (taskOptions, context, source) {
-    let { config, options } = context
-    options = Object.assign({}, options, taskOptions)
-
     console.log(`Running "${source}"...`)
-    let result = yield runTask(config, source, options)
 
-    if (result instanceof Help) {
-      return result
-    }
+    let { config, options } = context
+    options = Object.assign({}, config.options, options, taskOptions)
 
-    handleResult(result.value, result.command)
+    let task = yield loadTask(config, source)
+    let result = yield task.run(options, config)
+
+    handleResult(result, task.commandConfig)
     return context
   })
   .handle(() => {})
