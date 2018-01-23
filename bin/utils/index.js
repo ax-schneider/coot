@@ -1,11 +1,11 @@
-const fs = require('fs')
 const Path = require('path')
 const { tmpdir } = require('os')
-const { pathExists, copy, emptyDir } = require('fs-extra')
+const fs = require('fs-extra')
 const downloadGitRepo = require('download-git-repo')
-const { resolvePath, readConfig } = require('../lib/utils')
-const CliTask = require('./CliTask')
-const DEFAULT_COOT_CONFIG = require('./config.json')
+const { resolvePath, readConfig } = require('../../lib/utils')
+const CliTask = require('../CliTask')
+const DEFAULT_COOT_CONFIG = require('../config.json')
+const loadTaskConfig = require('./loadTaskConfig')
 
 
 const DEFAULT_COOT_DIR = resolvePath('~/.coot')
@@ -73,18 +73,22 @@ function normalizeConfig(config) {
   return config
 }
 
-function loadConfig(path = DEFAULT_COOT_CONFIG_PATH, normalize = true) {
+function loadConfig(path = DEFAULT_COOT_CONFIG_PATH) {
   let extension = Path.extname(path)
 
   if (extension !== '.json') {
     throw new Error('The coot config must be a JSON file')
   }
 
-  path = resolvePath(path)
-  let config = readConfig(path)
+  let config = readConfig(resolvePath(path))
   config.path = path
+  config = normalizeConfig(config)
 
-  return normalize ? normalizeConfig(config) : config
+  if (typeof config.options === 'string') {
+    config.options = readConfig(config.options)
+  }
+
+  return config
 }
 
 function resolveTaskAlias(config, alias) {
@@ -117,19 +121,23 @@ function normalizeTaskConfig(config) {
   return CliTask.normalizeConfig(config)
 }
 
-function loadTaskConfig(path, normalize = true) {
-  return CliTask.loadConfig(path, normalize)
-}
-
 function loadTask(config, source) {
   return resolveTaskSource(config, source)
-    .then((path) => CliTask.load(path))
+    .then(loadTaskConfig)
+    .then(
+      (config) => {
+        return new CliTask(config)
+      },
+      (err) => {
+        throw new Error(`Unable to load task ${source}: ${err.message}`)
+      }
+    )
 }
 
 function isTaskInstalled(config, name) {
   return new Promise((resolve) => {
     let path = resolvePath(config.tasksDir, name)
-    return resolve(pathExists(path))
+    return resolve(fs.pathExists(path))
   })
 }
 
@@ -158,10 +166,10 @@ function installTask(config, source, name) {
         .then((isInstalled) => {
           if (isInstalled) {
           // TODO: inquire for overwriting
-            return emptyDir(newPath)
+            return fs.emptyDir(newPath)
           }
         })
-        .then(() => copy(path, newPath))
+        .then(() => fs.copy(path, newPath))
         .then(() => newPath)
     })
 }
