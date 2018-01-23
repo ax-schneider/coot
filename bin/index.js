@@ -33,6 +33,7 @@ let install = app.command('install, i')
     .type('string')
     .positional()
 
+// TODO: remove the command and instead show the list as part of help
 let list = app.command('list, l')
   .description('List installed tasks')
   .version(false)
@@ -53,6 +54,8 @@ let run = app.command('run')
 app
   .tap((options) => {
     let config = loadConfig(options.config)
+    options = Object.assign({}, options)
+    delete options.config
     return { config, options }
   })
   .handle(() => new Help())
