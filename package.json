@@ -36,6 +36,7 @@
     "gulp-change": "^1.0.0",
     "gulp-conflict": "^0.4.0",
     "gulp-simple-rename": "^0.1.3",
+    "inquirer": "^5.0.1",
     "lodash.template": "^4.4.0",
     "normalize-package-data": "^2.4.0",
     "read-package-json": "^2.0.12",

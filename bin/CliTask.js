@@ -4,6 +4,7 @@ const conflict = require('gulp-conflict')
 const normalizePackageData = require('normalize-package-data')
 const FileTask = require('../lib/FileTask')
 const { interpolateFileStream: templateHandler } = require('./utils/templates')
+const inquirePlugin = require('./inquirePlugin')
 
 
 const DEFAULT_CONFIG = {
@@ -50,6 +51,7 @@ class CliTask extends FileTask {
   }
 }
 
+CliTask.plugins = FileTask.plugins.concat(inquirePlugin)
 CliTask.endHandlers = FileTask.endHandlers.concat(
   conflictHandler, templateHandler
 )

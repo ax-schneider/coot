@@ -61,7 +61,10 @@ function fillConfigWithTemplateOptions(config) {
         if (optionNames.length) {
           optionNames.forEach((name) => {
             if (!config.options[name]) {
-              config.options[name] = { type: null }
+              config.options[name] = {
+                type: null,
+                inquire: true,
+              }
             }
           })
         }
