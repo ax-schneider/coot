@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 
-const conflict = require('gulp-conflict')
 const normalizePackageData = require('normalize-package-data')
 const FileTask = require('../lib/FileTask')
 const { interpolateFileStream: templateHandler } = require('./utils/templates')
 const inquirePlugin = require('./inquirePlugin')
+const conflict = require('./vinylConflict')
 
 
 const DEFAULT_CONFIG = {
@@ -18,9 +18,7 @@ const DEFAULT_CONFIG = {
 
 
 function conflictHandler(files, options) {
-  return files.pipe(conflict(options.dest, {
-    logger: () => {},
-  }))
+  return files.pipe(conflict(options.dest))
 }
 
 
