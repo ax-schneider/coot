@@ -30,9 +30,9 @@ function* inquireForOption(optionConfig) {
   return answer[name]
 }
 
-function findOption(options, id) {
+function findOption(options, optionConfig) {
   return options && options.find((option) => {
-    return option.config && option.config.id === id
+    return option.name === optionConfig.name
   })
 }
 
@@ -57,7 +57,7 @@ module.exports = function* inquire(config, command) {
   for (let i = 0; i < optionConfigs.length; i++) {
     let optionConfig = optionConfigs[i]
 
-    if (findOption(options, optionConfig.id)) {
+    if (findOption(options, optionConfig)) {
       continue
     }
 
