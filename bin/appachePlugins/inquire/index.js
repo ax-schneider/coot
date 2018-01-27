@@ -19,7 +19,7 @@ function* executeHandler(config, batch) {
 }
 
 
-module.exports = function* inquirePlugin() {
+module.exports = function* inquire() {
   yield preHook('schematize', schematizeHandler)
 
   yield preHook({

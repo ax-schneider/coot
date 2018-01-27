@@ -2,7 +2,7 @@ const Path = require('path')
 const fs = require('fs-extra')
 const through2 = require('through2')
 const prompt = require('inquirer').createPromptModule()
-const PluginError = require('plugin-error').bind(null, 'vinyl-conflict')
+const PluginError = require('plugin-error').bind(null, 'conflict')
 
 
 const CHOICES = [{
@@ -57,7 +57,7 @@ function considerFile(dest, file) {
     })
 }
 
-module.exports = function vinylConflict(dest, options = {}) {
+module.exports = function conflict(dest, options = {}) {
   if (!dest) {
     throw new PluginError('Missing the destination dir parameter')
   }

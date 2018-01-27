@@ -3,8 +3,8 @@
 const normalizePackageData = require('normalize-package-data')
 const FileTask = require('../lib/FileTask')
 const { interpolateFileStream: templateHandler } = require('./utils/templates')
-const inquirePlugin = require('./inquirePlugin')
-const conflict = require('./vinylConflict')
+const appacheInquire = require('./appachePlugins/inquire')
+const vinylConflict = require('./vinylPlugins/conflict')
 
 
 const DEFAULT_CONFIG = {
@@ -18,7 +18,7 @@ const DEFAULT_CONFIG = {
 
 
 function conflictHandler(files, options) {
-  return files.pipe(conflict(options.dest))
+  return files.pipe(vinylConflict(options.dest))
 }
 
 
@@ -49,7 +49,7 @@ class CliTask extends FileTask {
   }
 }
 
-CliTask.plugins = FileTask.plugins.concat(inquirePlugin)
+CliTask.plugins = FileTask.plugins.concat(appacheInquire)
 CliTask.endHandlers = FileTask.endHandlers.concat(
   conflictHandler, templateHandler
 )
