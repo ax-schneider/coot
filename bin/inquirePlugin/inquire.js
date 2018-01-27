@@ -1,4 +1,4 @@
-const { findByIds } = require('appache/common')
+const { findByIds } = require('comanche/common')
 const prompt = require('inquirer').createPromptModule()
 
 

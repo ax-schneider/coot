@@ -1,5 +1,5 @@
 const vfs = require('vinyl-fs')
-const template = require('lodash.template')
+const template = require('lodash/template')
 const change = require('gulp-change')
 const rename = require('gulp-simple-rename')
 

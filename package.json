@@ -30,18 +30,18 @@
     "lint-staged": "^6.0.1"
   },
   "dependencies": {
-    "comanche": "^0.6.0",
+    "comanche": "^0.6.1",
     "download-git-repo": "^1.0.2",
     "fs-extra": "^5.0.0",
     "gulp-change": "^1.0.0",
     "gulp-simple-rename": "^0.1.3",
     "inquirer": "^5.0.1",
-    "lodash.template": "^4.4.0",
+    "lodash": "^4.17.4",
     "normalize-package-data": "^2.4.0",
     "plugin-error": "^1.0.1",
     "read-package-json": "^2.0.12",
     "require-json5": "^1.0.2",
     "through2": "^2.0.3",
-    "vinyl-fs": "^3.0.1"
+    "vinyl-fs": "^3.0.2"
   }
 }
