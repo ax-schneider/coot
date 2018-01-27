@@ -87,7 +87,9 @@ module.exports = function vinylConflict(dest, options = {}) {
     }
 
     considerFile(dest, file)
-      .then((action) => actions[action]())
+      .then((action) => {
+        return (actions[action]) ? actions[action]() : action
+      })
       .then(
         (addFile) => {
           addFile ? cb(null, file) : cb()
