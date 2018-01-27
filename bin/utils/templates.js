@@ -9,7 +9,9 @@ const TEMPLATE_OPTIONS = {
 }
 const PROXY_TRAPS = {
   get(target, prop) {
-    target.push(prop)
+    if (!target.includes(prop)) {
+      target.push(prop)
+    }
   },
 }
 
