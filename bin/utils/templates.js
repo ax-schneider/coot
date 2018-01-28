@@ -1,7 +1,5 @@
 const vfs = require('vinyl-fs')
-const template = require('lodash/template')
-const change = require('gulp-change')
-const rename = require('gulp-simple-rename')
+const template = require('../vinylPlugins/template')
 
 
 const TEMPLATE_OPTIONS = {
@@ -17,9 +15,7 @@ const PROXY_TRAPS = {
 
 
 function interpolateFileStream(fileStream, options) {
-  return fileStream
-    .pipe(change((contents) => template(contents, TEMPLATE_OPTIONS)(options)))
-    .pipe(rename((path) => template(path, TEMPLATE_OPTIONS)(options)))
+  return fileStream.pipe(template(TEMPLATE_OPTIONS, options))
 }
 
 function getOptionsFromTemplates(cwd, files) {
@@ -29,7 +25,8 @@ function getOptionsFromTemplates(cwd, files) {
     let stream = vfs.src(files, { cwd, dot: true })
 
     interpolateFileStream(stream, optionsProxy)
-      .on('close', () => resolve(optionNames))
+      .on('data', () => {})
+      .on('end', () => resolve(optionNames))
       .on('error', reject)
   })
 }
