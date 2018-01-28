@@ -30,7 +30,7 @@
     "lint-staged": "^6.0.1"
   },
   "dependencies": {
-    "comanche": "^0.6.1",
+    "comanche": "^0.6.2",
     "download-git-repo": "^1.0.2",
     "fs-extra": "^5.0.0",
     "gulp-change": "^1.0.0",

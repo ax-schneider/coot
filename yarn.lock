@@ -96,9 +96,9 @@ appache-type-paths@^0.1.2:
   dependencies:
     globby "^6.1.0"
 
-appache@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/appache/-/appache-0.8.0.tgz#15cc69b1d08f7cb71e6355961e872c3b268bd59d"
+appache@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/appache/-/appache-0.8.1.tgz#2e48b480a2c9089d2681452743e618a33f17e28a"
   dependencies:
     ajv "^5.5.2"
     ajv-keywords "^2.1.0"
@@ -330,11 +330,11 @@ columnify@^1.5.4:
     strip-ansi "^3.0.0"
     wcwidth "^1.0.0"
 
-comanche@^0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/comanche/-/comanche-0.6.1.tgz#fea8c60252d8686bcd213ecb67d5621572a3ac25"
+comanche@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/comanche/-/comanche-0.6.2.tgz#9724827d8a74f618fa7ac94ce4975feeae98d098"
   dependencies:
-    appache "^0.8.0"
+    appache "^0.8.1"
     appache-api-fluent "^0.6.0"
     appache-cli "^0.5.0"
     appache-pretty-errors "^0.1.2"
