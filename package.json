@@ -9,37 +9,46 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
+    "start": "webpack --mode=development --watch",
+    "dev": "webpack --mode=development",
+    "prod": "webpack --mode=production",
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.js": [
+    "+(lib|bin)/**/*.js": [
       "eslint --fix",
       "git add"
     ]
   },
-  "bin": "./bin/index.js",
+  "bin": "./dist/bin.js",
   "files": [
+    "dist",
     "bin",
     "lib",
     "index.js"
   ],
   "devDependencies": {
+    "clean-webpack-plugin": "^0.1.18",
     "eslint": "^4.16.0",
     "eslint-plugin-import": "^2.7.0",
     "husky": "^0.14.3",
-    "lint-staged": "^6.0.1"
+    "imports-loader": "^0.7.1",
+    "lint-staged": "^6.0.1",
+    "source-map-support": "^0.5.3",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "webpack": "^4.0.0-beta.0",
+    "webpack-append": "^0.1.2",
+    "webpack-cli": "^2.0.4"
   },
   "dependencies": {
     "comanche": "^0.6.2",
     "download-git-repo": "^1.0.2",
     "fs-extra": "^5.0.0",
-    "gulp-change": "^1.0.0",
     "inquirer": "^5.0.1",
     "lodash": "^4.17.4",
     "normalize-package-data": "^2.4.0",
     "plugin-error": "^1.0.1",
     "read-package-json": "^2.0.12",
-    "require-json5": "^1.0.2",
     "through2": "^2.0.3",
     "vinyl-fs": "^3.0.2"
   }
