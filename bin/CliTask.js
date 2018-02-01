@@ -8,11 +8,11 @@ const vinylConflict = require('./vinylPlugins/conflict')
 
 
 const DEFAULT_CONFIG = {
-  // npm's defaults for files
-  files: [
-    '**', '!._*', '!package.json', '!.git', '!CVS', '!.svn', '!.hg', '!.*.swp',
-    '!.lock-wscript', '!.wafpickle-N', '!node_modules', '!npm-debug.log',
-    '!.DS_Store', '!.npmrc', '!config.gypi', '!*.orig', '!package-lock.json',
+  files: ['**'],
+  ignore: [ // These are mostly npm's hard ignores
+    '._*', 'package.json', '.git', 'CVS', '.svn', '.hg', '.*.swp',
+    '.lock-wscript', '.wafpickle-N', 'node_modules', 'npm-debug.log',
+    '.DS_Store', '.npmrc', 'config.gypi', '*.orig', 'package-lock.json',
   ],
 }
 
