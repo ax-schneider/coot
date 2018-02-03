@@ -9,9 +9,7 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
-    "start": "webpack --mode=development --watch",
-    "dev": "webpack --mode=development",
-    "prod": "webpack --mode=production",
+    "build": "webpack --mode=production",
     "precommit": "lint-staged"
   },
   "lint-staged": {
