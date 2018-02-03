@@ -1,6 +1,9 @@
 /* eslint-disable no-console, indent */
 
-const { basename } = require('path')
+const Path = require('path')
+const { spawn } = require('child_process')
+const fs = require('fs-extra')
+const envEditor = require('env-editor')
 const comanche = require('comanche')
 const { Help } = require('comanche/common')
 const { handleResult } = require('appache-cli')
@@ -39,6 +42,14 @@ let list = app.command('list, l')
   .description('List installed tasks')
   .version(false)
 
+let task = app.command('task, t')
+  .description('Create a task if it doesn\'t exist and open it in the editor')
+  .version(false)
+  .option('name')
+    .description('Name of the task')
+    .required()
+    .positional()
+
 let run = app.command('run')
   .description('Run a task')
   .default()
@@ -66,7 +77,7 @@ install
     console.log(`Installing "${source}"...`)
     let path = yield installTask(config, source)
     console.log(`Successfully installed at ${path}`)
-    console.log(`Use "coot ${basename(path)}" to run the task`)
+    console.log(`Use "coot ${Path.basename(path)}" to run the task`)
   })
 
 list
@@ -82,6 +93,32 @@ list
     }
 
     console.log()
+  })
+
+task
+  .handle(({ name }, { config }) => {
+    let path = Path.join(config.tasksDir, name)
+    let { editor } = config.options
+    let editorObj = editor ? envEditor.get(editor) : envEditor.default()
+
+    fs.ensureDirSync(path)
+
+    let cp = spawn(editorObj.bin, [path], {
+      shell: true,
+      detached: true,
+      stdio: editorObj.isTerminalEditor ? 'inherit' : 'ignore',
+    })
+
+    return new Promise((resolve, reject) => {
+      cp.on('error', reject)
+
+      if (editorObj.isTerminalEditor) {
+        cp.on('exit', resolve)
+      } else {
+        cp.unref()
+        resolve()
+      }
+    }).then(process.exit)
   })
 
 run
