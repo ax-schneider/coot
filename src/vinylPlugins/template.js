@@ -1,6 +1,6 @@
 const Path = require('path')
 const through2 = require('through2')
-const tmpl = require('lodash/template')
+const tmpl = require('lodash.template')
 
 
 module.exports = function template(options, data) {

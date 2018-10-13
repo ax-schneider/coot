@@ -41,6 +41,7 @@ function inquireForReplacement(file) {
 
 function considerFile(dest, file) {
   let path = Path.join(dest, file.relative)
+
   return fs.readFile(path, 'utf8')
     .then((contents) => {
       let areFilesDifferent = (contents !== String(file.contents))
@@ -63,7 +64,7 @@ module.exports = function conflict(dest, options = {}) {
   }
 
   let { replaceAll, skipAll } = options
-  const actions = {
+  let actions = {
     end: () => process.exit(0),
     skip: () => false,
     replace: () => true,

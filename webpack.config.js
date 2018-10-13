@@ -5,7 +5,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 
-const ENTRY_PATH = Path.join(__dirname, 'bin', 'index.js')
+const ENTRY_PATH = Path.join(__dirname, 'src', 'bin.js')
 const OUTPUT_DIR = Path.join(__dirname, 'dist')
 const OUTPUT_FILE = 'bin.js'
 
