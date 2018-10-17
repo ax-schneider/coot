@@ -41,7 +41,7 @@ function addOptionsToConfig(config, optionNames) {
       })
     })
     .map((name) => {
-      return { name, inquire: true }
+      return { name, required: true }
     })
 
   config.options = config.options.concat(newOptions)

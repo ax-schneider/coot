@@ -1,6 +1,35 @@
+const prompt = require('inquirer').createPromptModule()
 const Task = require('../Task')
 const parseArgs = require('../utils/parseArgs')
 const makeHelp = require('../utils/makeHelp')
+
+
+function inquireForOption(optionConfig) {
+  let { name, description, inquire, defaultValue } = optionConfig
+  let endChar, message, type
+
+  if (optionConfig.type === 'boolean') {
+    type = 'confirm'
+    endChar = '?'
+  } else {
+    type = 'input'
+    endChar = ':'
+  }
+
+  if (typeof inquire === 'string') {
+    message = inquire
+  } else if (description) {
+    message = description + endChar
+  } else {
+    message = name[0].toUpperCase() + name.substr(1) + endChar
+  }
+
+  let question = {
+    name, type, message,
+    default: defaultValue,
+  }
+  return prompt(question).then((answer) => answer[name])
+}
 
 
 class Command extends Task {
@@ -25,6 +54,22 @@ class Command extends Task {
     })
 
     return super._prepareConfig()
+  }
+
+  _inquireForOptions(options) {
+    options = Object.assign({}, options)
+    return this.config.options
+      .filter(({ required, finalName }) => {
+        return required && (
+          options[finalName] === undefined || options[finalName] === null
+        )
+      })
+      .reduce((promise, optionConfig) => {
+        return promise
+          .then(() => inquireForOption(optionConfig))
+          .then((value) => (options[optionConfig.name] = value))
+      }, Promise.resolve())
+      .then(() => options)
   }
 
   _handleHelp() {
@@ -63,7 +108,8 @@ class Command extends Task {
       } else if (command) {
         result = this._runSubcommand(command, options, ...restArgs)
       } else {
-        result = this._handle(options, ...restArgs)
+        result = this._inquireForOptions(options)
+          .then((options) => this._handle(options, ...restArgs))
       }
 
       resolve(result)
