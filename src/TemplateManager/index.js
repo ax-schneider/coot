@@ -11,7 +11,7 @@ const TEMP_PATH = resolvePath(tmpdir(), 'coot')
 
 
 function determineIdType(id) {
-  if (/^[a-zA-Z0-9_-]+$/.test(id)) {
+  if (/^[a-zA-Z0-9_-\s]+$/.test(id)) {
     return 'name'
   } else if (/^([a-zA-Z]:|[a-zA-Z]:[/\\]|\/|\.|~).*/.test(id)) {
     return 'path'

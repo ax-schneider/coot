@@ -18,7 +18,7 @@ class TCommand extends Command {
 
     fs.ensureDirSync(path)
 
-    let cp = spawn(editorObj.bin, [path], {
+    let cp = spawn(editorObj.bin, [`"${path}"`], {
       shell: true,
       detached: true,
       stdio: editorObj.isTerminalEditor ? 'inherit' : 'ignore',
