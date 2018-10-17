@@ -67,7 +67,7 @@ class Command extends Task {
       .reduce((promise, optionConfig) => {
         return promise
           .then(() => inquireForOption(optionConfig))
-          .then((value) => (options[optionConfig.name] = value))
+          .then((value) => (options[optionConfig.finalName] = value))
       }, Promise.resolve())
       .then(() => options)
   }
