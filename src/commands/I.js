@@ -20,7 +20,7 @@ class ICommand extends Command {
         return coot.installTemplate(templateId, templateName)
       })
       .then(
-        (path) => console.log(`Installed at ${path}`),
+        (path) => path && console.log(`Installed at ${path}`),
         (err) => console.error(err)
       )
   }

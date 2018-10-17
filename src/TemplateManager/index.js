@@ -2,6 +2,7 @@ const Path = require('path')
 const { tmpdir } = require('os')
 const fs = require('fs-extra')
 const downloadGitRepo = require('download-git-repo')
+const prompt = require('inquirer').createPromptModule()
 const { resolvePath } = require('../utils/common')
 const Template = require('../commands/Template')
 
@@ -59,6 +60,14 @@ function resolveTemplateId(dir, id) {
       return resolve(id)
     }
   })
+}
+
+function inquireForConfirmation() {
+  return prompt({
+    type: 'confirm',
+    name: 'confirm',
+    message: 'Replace the existing template?',
+  }).then((answer) => answer.confirm)
 }
 
 
@@ -120,14 +129,22 @@ class TemplateManager {
         }
 
         return this.isTemplateInstalled(name)
-          .then((isInstalled) => {
-            if (isInstalled) {
-            // TODO: inquire for overwriting
+          .then((exists) => {
+            // Inquiry doesn't actually belong here because this module
+            // isn't supposed to know anything about the CLI.
+            // It should emit an event or something
+            return exists ? inquireForConfirmation() : true
+          })
+          .then((answer) => {
+            if (answer) {
               return fs.emptyDir(newPath)
+                .then(() => fs.copy(path, newPath))
+                .then(() => true)
             }
           })
-          .then(() => fs.copy(path, newPath))
-          .then(() => newPath)
+          .then((installed) => {
+            return installed ? newPath : false
+          })
       })
   }
 }
