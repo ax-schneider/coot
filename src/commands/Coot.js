@@ -9,30 +9,29 @@ const T = require('./T')
 
 
 class CootCommand extends Command {
-  _handleDefault(options) {
-    return this.coot.getInstalledTemplates()
-      .then((templates) => prompt({
-        type: 'list',
-        name: 'templateName',
-        message: 'Choose a template to generate:',
-        choices: templates,
-        default: templates[0],
-      }))
-      .then((answers) => {
-        return this._handle(options, answers.templateName)
-      })
+  _inquireForCommand() {
+    let choices = CootCommand.commands.map((command) => {
+      let { name, description } = command.config
+      return { name: `${name}) ${description}`, value: name }
+    })
+    return prompt({
+      type: 'list',
+      name: 'command',
+      message: 'Choose a command to execute:',
+      default: choices[0],
+      choices,
+    }).then((answer) => answer.command)
   }
 
   _handle(options, ...args) {
-    if (!args.length) {
-      return this._handleDefault()
-    } else {
-      return this._runSubcommand('g', options, ...args)
-    }
+    let promise = args.length ? Promise.resolve('g') : this._inquireForCommand()
+    return promise.then((command) => {
+      return this._runSubcommand(command, options, ...args)
+    })
   }
 }
 
-CootCommand.commands = [I, G, T]
+CootCommand.commands = [G, I, T]
 CootCommand.config = {
   name: 'coot',
   description: 'Coot',
