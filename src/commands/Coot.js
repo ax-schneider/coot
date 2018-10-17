@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+const prompt = require('inquirer').createPromptModule()
 const pkg = require('../../package.json')
 const Command = require('./Command')
 const I = require('./I')
@@ -8,27 +9,25 @@ const T = require('./T')
 
 
 class CootCommand extends Command {
-  _showInstalledTemplates() {
+  _handleDefault(options) {
     return this.coot.getInstalledTemplates()
-      .then((templates) => {
-        console.log()
-
-        if (templates.length) {
-          console.log('INSTALLED TEMPLATES')
-          templates.forEach((template) => console.log(` ${template}`))
-        } else {
-          console.log('There are no installed templates')
-        }
-
-        console.log()
+      .then((templates) => prompt({
+        type: 'list',
+        name: 'templateName',
+        message: 'Choose a template to generate:',
+        choices: templates,
+        default: templates[0],
+      }))
+      .then((answers) => {
+        return this._handle(options, answers.templateName)
       })
   }
 
   _handle(options, ...args) {
-    if (args.length) {
-      return this._runSubcommand('g', options, ...args)
+    if (!args.length) {
+      return this._handleDefault()
     } else {
-      return this._showInstalledTemplates()
+      return this._runSubcommand('g', options, ...args)
     }
   }
 }
