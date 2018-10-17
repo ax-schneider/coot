@@ -2,7 +2,7 @@
 
 const Path = require('path')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 
 
 const ENTRY_PATH = Path.join(__dirname, 'src', 'bin.js')
@@ -23,9 +23,9 @@ module.exports = {
   optimization: {
     // Override the default minimizer to pass custom settings to UglifyJS
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         sourceMap: true,
-        uglifyOptions: {
+        terserOptions: {
           // Disable messing with function names because it breaks Inquirer
           mangle: {
             keep_fnames: true,
