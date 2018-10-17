@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+const prompt = require('inquirer').createPromptModule()
 const Command = require('./Command')
 
 
@@ -8,12 +9,26 @@ class GCommand extends Command {
     return this._handle(options, ...args)
   }
 
-  _handle(options, ...args) {
-    if (!options.templateId) {
-      options.templateId = this.config.name
-    }
+  _inquireForTemplateName() {
+    return this.coot.getInstalledTemplates()
+      .then((templates) => {
+        return prompt({
+          type: 'list',
+          name: 'template',
+          message: 'Choose a template to generate:',
+          choices: templates,
+          default: templates[0],
+        }).then((answer) => answer.template)
+      })
+  }
 
-    return this.coot.loadTemplate(options.templateId)
+  _handle(options, ...args) {
+    let promise = options.templateId ?
+      Promise.resolve(options.templateId) :
+      this._inquireForTemplateName()
+
+    return promise
+      .then((templateId) => this.coot.loadTemplate(templateId))
       .then((template) => template.run(options))
       .then((result) => {
         if (!args.length) {
@@ -37,7 +52,6 @@ GCommand.config = {
   options: [{
     name: 'template_id',
     description: 'A local path or a git URL of the template to generate',
-    required: true,
     positional: true,
   }],
 }
