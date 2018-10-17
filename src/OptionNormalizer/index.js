@@ -9,10 +9,10 @@ class OptionNormalizer {
 
   _normalizeOptionName(schema, name) {
     if (schema) {
-      name = schema.name
+      return schema.finalName
+    } else {
+      return camelcase(name)
     }
-
-    return camelcase(name)
   }
 
   _normalizeOptionValue(schema, value) {

@@ -1,3 +1,4 @@
+const camelcase = require('camelcase')
 const OptionNormalizer = require('../OptionNormalizer')
 
 
@@ -12,6 +13,10 @@ function normalizeConfigOptions(options = []) {
 
     if (!type && defaultValue !== undefined && defaultValue !== null) {
       option.type = typeof defaultValue
+    }
+
+    if (!option.finalName) {
+      option.finalName = camelcase(option.name)
     }
 
     return option
