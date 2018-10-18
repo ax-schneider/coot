@@ -1,7 +1,7 @@
 const prompt = require('inquirer').createPromptModule()
 
 
-function inquireForOption(optionConfig) {
+function makeQuestion(optionConfig) {
   let { name, description, inquire, defaultValue } = optionConfig
   let endChar, message, type
 
@@ -21,22 +21,20 @@ function inquireForOption(optionConfig) {
     message = name[0].toUpperCase() + name.substr(1) + endChar
   }
 
-  let question = {
+  return {
     name, type, message,
     default: defaultValue,
   }
-  return prompt(question).then((answer) => answer[name])
+}
+
+function inquireForOption(optionConfig) {
+  let question = makeQuestion(optionConfig)
+  return prompt(question).then((answer) => answer[question.name])
 }
 
 function inquireForOptions(optionConfigs) {
-  let answers = {}
-  return optionConfigs
-    .reduce((promise, optionConfig) => {
-      return promise
-        .then(() => inquireForOption(optionConfig))
-        .then((value) => (answers[optionConfig.finalName] = value))
-    }, Promise.resolve())
-    .then(() => answers)
+  let questions = optionConfigs.map(makeQuestion)
+  return prompt(questions)
 }
 
 
