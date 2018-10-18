@@ -37,7 +37,7 @@ class GCommand extends Command {
 
         return this.constructor.create(this.coot)
           .then((generate) => {
-            return generate.run({ templateId: args.shift() }, ...args)
+            return generate.run(null, ...args)
           })
       })
   }
