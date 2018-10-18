@@ -7,7 +7,7 @@ const { resolvePath } = require('../utils/common')
 const {
   interpolateFileStream, fillConfigWithTemplateOptions,
 } = require('../utils/templates')
-const Command = require('./Command')
+const Task = require('../Task')
 
 
 const DEFAULT_CONFIG = {
@@ -41,11 +41,11 @@ function validateTemplatePath(path) {
 
 function makeTemplateConfigForPath(path) {
   let name = Path.basename(path)
-  return Object.assign({ name, description: name }, DEFAULT_CONFIG)
+  return Object.assign({ name }, DEFAULT_CONFIG)
 }
 
 
-class Template extends Command {
+class Template extends Task {
   static create(path) {
     return new Promise((resolve, reject) => {
       path = resolvePath(path)
@@ -94,14 +94,6 @@ class Template extends Command {
 
   _handle(options) {
     return new Promise((resolve, reject) => {
-      /* eslint-disable no-console */
-      console.log(`Generating ${this.config.name}...`)
-
-      if (!options.dest) {
-        // TODO: add the "path" option type
-        options = Object.assign({}, options, { dest: process.cwd() })
-      }
-
       let fileStream = this._src()
       fileStream = fileStream.pipe(vinylConflict(options.dest))
       fileStream = interpolateFileStream(fileStream, options)
