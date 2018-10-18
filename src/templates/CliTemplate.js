@@ -12,15 +12,15 @@ class CliTemplate extends Template {
   }
 
   _inquireForOptions(options) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       let configs = this.config.options.filter(({ required, finalName }) => {
         return required && (
           options[finalName] === undefined || options[finalName] === null
         )
       })
-      let result = inquireForOptions(configs)
+      inquireForOptions(configs)
         .then((answers) => Object.assign({}, options, answers))
-      resolve(result)
+        .then(resolve, reject)
     })
   }
 

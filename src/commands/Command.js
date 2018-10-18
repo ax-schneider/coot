@@ -41,9 +41,15 @@ class Command extends Task {
   }
 
   _runSubcommand(name, options, ...args) {
-    let Command = this.constructor.commands.find((c) => c.config.name === name)
-    return Command.create(this.coot).then((command) => {
-      return command.run(options, ...args)
+    return new Promise((resolve, reject) => {
+      let Command = this.constructor.commands.find((c) => {
+        return c.config.name === name
+      })
+      Command.create(this.coot)
+        .then((command) => {
+          return command.run(options, ...args)
+        })
+        .then(resolve, reject)
     })
   }
 

@@ -11,4 +11,6 @@ Coot.load(process.cwd())
   .then((command) => {
     return command.run(null, ...process.argv.slice(2))
   })
-  .catch(console.error)
+  // For some reason, fs.lstat and vinyl-fs sometimes leave the process hanging,
+  // so we resort to killing it manually
+  .then(() => process.exit(), console.error)

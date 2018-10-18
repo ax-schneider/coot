@@ -2,7 +2,7 @@ const prompt = require('inquirer').createPromptModule()
 
 
 function makeQuestion(optionConfig) {
-  let { name, description, inquire, defaultValue } = optionConfig
+  let { name, finalName, description, inquire, defaultValue } = optionConfig
   let endChar, message, type
 
   if (optionConfig.type === 'boolean') {
@@ -22,7 +22,7 @@ function makeQuestion(optionConfig) {
   }
 
   return {
-    name, type, message,
+    name: finalName, type, message,
     default: defaultValue,
   }
 }

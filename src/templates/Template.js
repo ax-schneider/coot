@@ -1,6 +1,5 @@
-const fs = require('fs')
 const Path = require('path')
-const { Transform } = require('stream')
+const fs = require('fs-extra')
 const vinylFs = require('vinyl-fs')
 const vinylConflict = require('../vinylPlugins/conflict')
 const { resolvePath } = require('../utils/common')
@@ -75,17 +74,12 @@ class Template extends Task {
 
   _src() {
     let { files, ignore } = this.config
-
-    if (files && files.length) {
-      return vinylFs.src(files, {
-        ignore,
-        cwd: this.path,
-        dot: true,
-        allowEmpty: true,
-      })
-    } else {
-      return new Transform()
-    }
+    return vinylFs.src(files, {
+      ignore,
+      cwd: this.path,
+      dot: true,
+      allowEmpty: true,
+    })
   }
 
   _dest(fileStream, options) {

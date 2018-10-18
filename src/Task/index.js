@@ -70,7 +70,7 @@ class Task {
   }
 
   _handle() {
-
+    throw new Error('Not implemented')
   }
 
   run(rawOptions, ...args) {
