@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const prompt = require('inquirer').createPromptModule()
+const { prompt } = require('../utils/inquire')
 const Command = require('./Command')
 
 

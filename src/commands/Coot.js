@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
-const prompt = require('inquirer').createPromptModule()
 const pkg = require('../../package.json')
+const { prompt } = require('../utils/inquire')
 const Command = require('./Command')
 const I = require('./I')
 const G = require('./G')

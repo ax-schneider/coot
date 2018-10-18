@@ -1,8 +1,8 @@
 const Path = require('path')
 const fs = require('fs-extra')
 const through2 = require('through2')
-const prompt = require('inquirer').createPromptModule()
 const PluginError = require('plugin-error').bind(null, 'conflict')
+const { prompt } = require('../utils/inquire')
 
 
 const CHOICES = [{

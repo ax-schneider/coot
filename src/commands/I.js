@@ -1,28 +1,44 @@
 /* eslint-disable no-console */
 
+const { inquireForOptions } = require('../utils/inquire')
 const Coot = require('../Coot')
 const Command = require('./Command')
 
 
 class ICommand extends Command {
-  _handle({ templateId, templateName }) {
-    if (!templateId) {
-      return this._handleHelp()
-    }
-
-    Coot.load(process.cwd())
+  _installTemplate(id, name) {
+    return Coot.load(process.cwd())
       .then((coot) => {
-        if (templateName) {
-          console.log(`Installing ${templateId} as ${templateName}...`)
+        if (name) {
+          console.log(`Installing ${id} as ${name}...`)
         } else {
-          console.log(`Installing ${templateId}...`)
+          console.log(`Installing ${id}...`)
         }
-        return coot.installTemplate(templateId, templateName)
+        return coot.installTemplate(id, name)
       })
       .then(
         (path) => path && console.log(`Installed at ${path}`),
         (err) => console.error(err)
       )
+  }
+
+  _handle({ templateId, templateName }) {
+    if (templateId) {
+      return this._installTemplate(templateId, templateName)
+    }
+
+    let optionConfigs = this.config.options.filter((o) => {
+      return o.name === 'template_id' || o.name === 'template_name'
+    })
+    // TODO: derive the default templateName from templateId
+    return inquireForOptions(optionConfigs)
+      .then(({ templateId, templateName }) => {
+        if (templateId) {
+          return this._installTemplate(templateId, templateName)
+        } else {
+          return this._handleHelp()
+        }
+      })
   }
 }
 
