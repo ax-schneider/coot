@@ -7,7 +7,23 @@ const Command = require('./Command')
 
 
 class TCommand extends Command {
-  _createTemplate(templateName) {
+  _prepareOptions(options, ...args) {
+    return new Promise((resolve, reject) => {
+      if (options.template_name) {
+        return resolve(options)
+      }
+
+      let optionConfig = this.config.options.find((o) => {
+        return o.name === 'template_name'
+      })
+      return inquireForOption(optionConfig)
+        // eslint-disable-next-line camelcase
+        .then((template_name) => Object.assign({}, options, { template_name }))
+        .then(resolve, reject)
+    }).then((options) => super._prepareOptions(options, ...args))
+  }
+
+  _handle({ templateName }) {
     return new Promise((resolve, reject) => {
       let config = this.coot.getConfig()
       let path = Path.join(config.templatesDir, templateName)
@@ -31,24 +47,6 @@ class TCommand extends Command {
         resolve()
       }
     })
-  }
-
-  _handle({ templateName }) {
-    if (templateName) {
-      return this._createTemplate(templateName)
-    }
-
-    let optionConfig = this.config.options.find((o) => {
-      return o.name === 'template_name'
-    })
-    return inquireForOption(optionConfig)
-      .then((templateName) => {
-        if (templateName) {
-          return this._createTemplate(templateName)
-        } else {
-          return this._handleHelp()
-        }
-      })
   }
 }
 

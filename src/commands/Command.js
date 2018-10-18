@@ -54,25 +54,25 @@ class Command extends Task {
   }
 
   run(taskOptions, ...args) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       let {
         options: argOptions, restArgs, command,
       } = parseArgs(this.config, args)
       let compositeOptions = Object.assign({}, argOptions, taskOptions)
-      let options = this._prepareOptions(compositeOptions)
-      let result
 
-      if (options.help) {
-        result = this._handleHelp(options, ...restArgs)
-      } else if (options.version) {
-        result = this._handleVersion(options, ...restArgs)
-      } else if (command) {
-        result = this._runSubcommand(command, options, ...restArgs)
-      } else {
-        result = this._handle(options, ...restArgs)
-      }
-
-      resolve(result)
+      return this._prepareOptions(compositeOptions, ...args)
+        .then((options) => {
+          if (options.help) {
+            return this._handleHelp(options, ...restArgs)
+          } else if (options.version) {
+            return this._handleVersion(options, ...restArgs)
+          } else if (command) {
+            return this._runSubcommand(command, options, ...restArgs)
+          } else {
+            return this._handle(options, ...restArgs)
+          }
+        })
+        .then(resolve, reject)
     })
   }
 }

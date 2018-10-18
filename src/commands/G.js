@@ -5,30 +5,38 @@ const Command = require('./Command')
 
 
 class GCommand extends Command {
-  _handleHelp(options, ...args) {
-    return this._handle(options, ...args)
+  _prepareOptions(options, ...args) {
+    return new Promise((resolve, reject) => {
+      if (options.template_id) {
+        return resolve(options)
+      }
+
+      this.coot.getInstalledTemplates()
+        .then((templates) => {
+          return prompt({
+            type: 'list',
+            name: 'template',
+            message: 'Choose a template to generate:',
+            choices: templates,
+            default: templates[0],
+          }).then((answer) => answer.template)
+        })
+        // eslint-disable-next-line camelcase
+        .then((template_id) => Object.assign({}, options, { template_id }))
+        .then(resolve, reject)
+    }).then((options) => super._prepareOptions(options, ...args))
   }
 
-  _inquireForTemplateName() {
-    return this.coot.getInstalledTemplates()
-      .then((templates) => {
-        return prompt({
-          type: 'list',
-          name: 'template',
-          message: 'Choose a template to generate:',
-          choices: templates,
-          default: templates[0],
-        }).then((answer) => answer.template)
-      })
+  _handleHelp(options, ...args) {
+    if (options.templateId) {
+      return this._handle(options, ...args)
+    } else {
+      return super._handleHelp(options, ...args)
+    }
   }
 
   _handle(options, ...args) {
-    let promise = options.templateId ?
-      Promise.resolve(options.templateId) :
-      this._inquireForTemplateName()
-
-    return promise
-      .then((templateId) => this.coot.loadTemplate(templateId))
+    return this.coot.loadTemplate(options.templateId)
       .then((template) => template.run(options))
       .then((result) => {
         if (!args.length) {
@@ -36,9 +44,7 @@ class GCommand extends Command {
         }
 
         return this.constructor.create(this.coot)
-          .then((generate) => {
-            return generate.run(null, ...args)
-          })
+          .then((generate) => generate.run(null, ...args))
       })
   }
 }

@@ -6,40 +6,37 @@ const Command = require('./Command')
 
 
 class ICommand extends Command {
-  _installTemplate(id, name) {
+  _prepareOptions(options, ...args) {
+    return new Promise((resolve, reject) => {
+      if (options.template_id) {
+        return resolve(options)
+      }
+
+      let optionConfigs = this.config.options.filter((o) => {
+        return o.name === 'template_id' || o.name === 'template_name'
+      })
+
+      // TODO: derive the default templateName from templateId
+      inquireForOptions(optionConfigs)
+        .then((answers) => Object.assign({}, options, answers))
+        .then(resolve, reject)
+    }).then((options) => super._prepareOptions(options, ...args))
+  }
+
+  _handle({ templateId, templateName }) {
     return Coot.load(process.cwd())
       .then((coot) => {
-        if (name) {
-          console.log(`Installing ${id} as ${name}...`)
+        if (templateName) {
+          console.log(`Installing ${templateId} as ${templateName}...`)
         } else {
-          console.log(`Installing ${id}...`)
+          console.log(`Installing ${templateId}...`)
         }
-        return coot.installTemplate(id, name)
+        return coot.installTemplate(templateId, templateName)
       })
       .then(
         (path) => path && console.log(`Installed at ${path}`),
         (err) => console.error(err)
       )
-  }
-
-  _handle({ templateId, templateName }) {
-    if (templateId) {
-      return this._installTemplate(templateId, templateName)
-    }
-
-    let optionConfigs = this.config.options.filter((o) => {
-      return o.name === 'template_id' || o.name === 'template_name'
-    })
-
-    // TODO: derive the default templateName from templateId
-    return inquireForOptions(optionConfigs)
-      .then(({ templateId, templateName }) => {
-        if (templateId) {
-          return this._installTemplate(templateId, templateName)
-        } else {
-          return this._handleHelp()
-        }
-      })
   }
 }
 

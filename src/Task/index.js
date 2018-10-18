@@ -66,7 +66,10 @@ class Task {
   }
 
   _prepareOptions(options) {
-    return this.optionNormalizer.normalize(options)
+    return new Promise((resolve) => {
+      let result = this.optionNormalizer.normalize(options)
+      resolve(result)
+    })
   }
 
   _handle() {
@@ -74,10 +77,10 @@ class Task {
   }
 
   run(rawOptions, ...args) {
-    return new Promise((resolve) => {
-      let options = this._prepareOptions(rawOptions || {})
-      let result = this._handle(options || {}, ...args)
-      return resolve(result)
+    return new Promise((resolve, reject) => {
+      this._prepareOptions(rawOptions || {}, ...args)
+        .then((options) => this._handle(options || {}, ...args))
+        .then(resolve, reject)
     })
   }
 }
