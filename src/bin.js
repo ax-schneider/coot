@@ -4,6 +4,7 @@ const CootCommand = require('./commands/Coot')
 const Coot = require('./Coot')
 
 
+console.log()
 Coot.load(process.cwd())
   .then((coot) => {
     return CootCommand.create(coot)
@@ -11,6 +12,13 @@ Coot.load(process.cwd())
   .then((command) => {
     return command.run(null, ...process.argv.slice(2))
   })
-  // For some reason, fs.lstat and vinyl-fs sometimes leave the process hanging,
-  // so we resort to killing it manually
-  .then(() => process.exit(), console.error)
+  .then(() => {}, (err) => err)
+  .then((result) => {
+    if (result) {
+      console.error(result)
+    }
+
+    console.log()
+    let code = Number(Boolean(result))
+    process.exit(code)
+  })
