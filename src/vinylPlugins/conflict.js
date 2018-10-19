@@ -36,7 +36,7 @@ function inquireForReplacement(file) {
     default: 0,
     choices: CHOICES,
   }
-  return inquire([question]).then((answers) => answers.replace)
+  return inquire(question).then((answers) => answers.replace)
 }
 
 function considerFile(dest, file) {

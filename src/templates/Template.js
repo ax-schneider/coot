@@ -89,8 +89,8 @@ class Template extends Task {
   _handle(options) {
     return new Promise((resolve, reject) => {
       let fileStream = this._src()
-      fileStream = fileStream.pipe(vinylConflict(options.dest))
       fileStream = interpolateFileStream(fileStream, options)
+      fileStream = fileStream.pipe(vinylConflict(options.dest))
       this._dest(fileStream, options)
         .on('end', resolve)
         .on('error', reject)
