@@ -9,8 +9,12 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
-    "build": "webpack --mode=production",
-    "precommit": "lint-staged"
+    "build": "webpack --mode=production"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "lint-staged": {
     "src/**/*.js": [
