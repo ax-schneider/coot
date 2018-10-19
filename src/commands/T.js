@@ -2,6 +2,7 @@ const Path = require('path')
 const { spawn } = require('child_process')
 const fs = require('fs-extra')
 const envEditor = require('env-editor')
+const { findByName } = require('../utils/common')
 const { inquireForOption } = require('../utils/inquire')
 const Command = require('./Command')
 
@@ -13,9 +14,7 @@ class TCommand extends Command {
         return resolve(options)
       }
 
-      let optionConfig = this.config.options.find((o) => {
-        return o.name === 'template_name'
-      })
+      let optionConfig = findByName(this.config.options, 'template_name')
       return inquireForOption(optionConfig)
         // eslint-disable-next-line camelcase
         .then((template_name) => Object.assign({}, options, { template_name }))

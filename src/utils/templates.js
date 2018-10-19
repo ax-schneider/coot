@@ -1,5 +1,6 @@
 const vfs = require('vinyl-fs')
 const template = require('../vinylPlugins/template')
+const { findByName } = require('../utils/common')
 
 
 const TEMPLATE_OPTIONS = {
@@ -36,9 +37,7 @@ function addOptionsToConfig(config, optionNames) {
 
   let newOptions = optionNames
     .filter((name) => {
-      return !config.options.find((o) => {
-        return o.name === name || (o.aliases && o.aliases.includes(name))
-      })
+      return !findByName(config.options, name, true)
     })
     .map((name) => {
       return { name, inquire: true }

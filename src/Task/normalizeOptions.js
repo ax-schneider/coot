@@ -1,4 +1,5 @@
 const camelcase = require('camelcase')
+const { findByName } = require('../utils/common')
 const coercers = require('./coercers')
 
 
@@ -36,11 +37,7 @@ function normalizeOption({ name, value, config = {} }) {
 function normalizeOptions(optionConfigs, options = {}) {
   let passedOptions = Object.keys(options).map((name) => {
     let value = options[name]
-    let config = optionConfigs.find((config) => {
-      return config.name === name || config.finalName === name || (
-        config.aliases && config.aliases.includes(name)
-      )
-    })
+    let config = findByName(optionConfigs, name, true)
     return { name, value, config }
   })
   let definedOptions = optionConfigs

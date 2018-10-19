@@ -43,5 +43,17 @@ function readJson(path) {
   })
 }
 
+function findByName(configs, name, checkAllProps) {
+  return configs.find((config) => {
+    if (!checkAllProps) {
+      return config.name === name
+    }
 
-module.exports = { resolvePath, readJson }
+    return config.name === name || config.finalName === name || (
+      config.aliases && config.aliases.includes(name)
+    )
+  })
+}
+
+
+module.exports = { resolvePath, readJson, findByName }
