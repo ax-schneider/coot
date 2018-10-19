@@ -12,8 +12,8 @@ class ICommand extends Command {
         return resolve(options)
       }
 
-      let optionConfigs = this.config.options.filter((o) => {
-        return o.name === 'template_id' || o.name === 'template_name'
+      let optionConfigs = this.config.options.filter(({ name }) => {
+        return name === 'template_id' || name === 'template_name'
       })
 
       // TODO: derive the default templateName from templateId

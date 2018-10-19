@@ -2,7 +2,7 @@ const Path = require('path')
 const fs = require('fs-extra')
 const through2 = require('through2')
 const PluginError = require('plugin-error').bind(null, 'conflict')
-const { prompt } = require('../utils/inquire')
+const { inquire } = require('../utils/inquire')
 
 
 const CHOICES = [{
@@ -36,7 +36,7 @@ function inquireForReplacement(file) {
     default: 0,
     choices: CHOICES,
   }
-  return prompt([question]).then((answers) => answers.replace)
+  return inquire([question]).then((answers) => answers.replace)
 }
 
 function considerFile(dest, file) {

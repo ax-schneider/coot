@@ -1,5 +1,5 @@
 const camelcase = require('camelcase')
-const OptionNormalizer = require('../OptionNormalizer')
+const normalizeOptions = require('./normalizeOptions')
 
 
 function normalizeConfigOptions(options = []) {
@@ -60,14 +60,11 @@ class Task {
   // After initialization is completed, the task should be ready to run
   init() {
     return this._prepareConfig()
-      .then(() => {
-        this.optionNormalizer = new OptionNormalizer(this.config.options)
-      })
   }
 
-  _prepareOptions(options) {
+  _prepareOptions(options = {}) {
     return new Promise((resolve) => {
-      let result = this.optionNormalizer.normalize(options)
+      let result = normalizeOptions(this.config.options, options)
       resolve(result)
     })
   }

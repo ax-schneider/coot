@@ -11,17 +11,22 @@ class CliTemplate extends Template {
       })
   }
 
-  _inquireForOptions(options) {
+  _prepareOptions(options, ...args) {
+    // console.log(options)
     return new Promise((resolve, reject) => {
-      let configs = this.config.options.filter(({ required, finalName }) => {
-        return required && (
+      let optionConfigs = this.config.options.filter((config) => {
+        let { inquire, name, finalName } = config
+        return inquire && (
+          options[name] === undefined || options[name] === null
+        ) && (
           options[finalName] === undefined || options[finalName] === null
         )
       })
-      inquireForOptions(configs)
+
+      inquireForOptions(optionConfigs)
         .then((answers) => Object.assign({}, options, answers))
         .then(resolve, reject)
-    })
+    }).then((options) => super._prepareOptions(options, ...args))
   }
 
   _handleHelp() {
@@ -33,22 +38,22 @@ class CliTemplate extends Template {
   }
 
   _handle(options) {
-    if (options.help) {
-      return this._handleHelp()
-    }
+    return new Promise((resolve) => {
+      if (options.help) {
+        return this._handleHelp()
+      }
 
-    return this._inquireForOptions(options)
-      .then((options) => {
-        /* eslint-disable no-console */
-        console.log(`Generating ${this.config.name}...`)
+      /* eslint-disable no-console */
+      console.log(`Generating ${this.config.name}...`)
 
-        if (!options.dest) {
-          // TODO: add the "path" option type
-          options = Object.assign({}, options, { dest: process.cwd() })
-        }
+      if (!options.dest) {
+        // TODO: add the "path" option type
+        options = Object.assign({}, options, { dest: process.cwd() })
+      }
 
-        return super._handle(options)
-      })
+      let result = super._handle(options)
+      resolve(result)
+    })
   }
 }
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const { prompt } = require('../utils/inquire')
+const { inquire } = require('../utils/inquire')
 const Command = require('./Command')
 
 
@@ -13,7 +13,7 @@ class GCommand extends Command {
 
       this.coot.getInstalledTemplates()
         .then((templates) => {
-          return prompt({
+          return inquire({
             type: 'list',
             name: 'template',
             message: 'Choose a template to generate:',

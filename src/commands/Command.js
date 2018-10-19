@@ -61,17 +61,23 @@ class Command extends Task {
       let compositeOptions = Object.assign({}, argOptions, taskOptions)
 
       return this._prepareOptions(compositeOptions, ...args)
-        .then((options) => {
-          if (options.help) {
-            return this._handleHelp(options, ...restArgs)
-          } else if (options.version) {
-            return this._handleVersion(options, ...restArgs)
-          } else if (command) {
-            return this._runSubcommand(command, options, ...restArgs)
-          } else {
-            return this._handle(options, ...restArgs)
+        .then(
+          (options) => {
+            if (options.help) {
+              return this._handleHelp(options, ...restArgs)
+            } else if (options.version) {
+              return this._handleVersion(options, ...restArgs)
+            } else if (command) {
+              return this._runSubcommand(command, options, ...restArgs)
+            } else {
+              return this._handle(options, ...restArgs)
+            }
+          },
+          (err) => {
+            console.error(`Error: ${err.message}`)
+            return this._handleHelp(null, ...restArgs)
           }
-        })
+        )
         .then(resolve, reject)
     })
   }

@@ -3,7 +3,7 @@ const { tmpdir } = require('os')
 const fs = require('fs-extra')
 const downloadGitRepo = require('download-git-repo')
 const { resolvePath } = require('../utils/common')
-const { prompt } = require('../utils/inquire')
+const { inquire } = require('../utils/inquire')
 const CliTemplate = require('../templates/CliTemplate')
 
 
@@ -63,7 +63,7 @@ function resolveTemplateId(dir, id) {
 }
 
 function inquireForConfirmation() {
-  return prompt({
+  return inquire({
     type: 'confirm',
     name: 'confirm',
     message: 'Replace the existing template?',

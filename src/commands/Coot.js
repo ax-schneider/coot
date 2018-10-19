@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 const pkg = require('../../package.json')
-const { prompt } = require('../utils/inquire')
+const { inquire } = require('../utils/inquire')
 const Command = require('./Command')
 const I = require('./I')
 const G = require('./G')
@@ -14,7 +14,7 @@ class CootCommand extends Command {
       let { name, description } = command.config
       return { name: `${name}) ${description}`, value: name }
     })
-    return prompt({
+    return inquire({
       type: 'list',
       name: 'command',
       message: 'Choose a command to execute:',
