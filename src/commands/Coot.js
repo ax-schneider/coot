@@ -31,6 +31,9 @@ class CootCommand extends Command {
       .then((coot) => {
         this.coot = coot
 
+        console.log(`Coot [${coot.configManager.path}]`)
+        console.log()
+
         if (args.length) {
           return 'g'
         } else {
