@@ -1,21 +1,39 @@
 const Path = require('path')
 const fs = require('fs-extra')
 const vinylFs = require('vinyl-fs')
+const parseIgnore = require('parse-gitignore')
 const vinylConflict = require('../vinylPlugins/conflict')
-const { resolvePath } = require('../utils/common')
-const {
-  interpolateFileStream, fillConfigWithTemplateOptions,
-} = require('../utils/templates')
+const template = require('../vinylPlugins/template')
+const { resolvePath, findByName } = require('../utils/common')
 const Task = require('../Task')
 
 
+const IGNORE_FILE = '.cootignore'
 const DEFAULT_CONFIG = {
   files: ['**'],
-  ignore: [ // These are mostly npm's hard ignores
-    '._*', '.git', 'CVS', '.svn', '.hg', '.*.swp', '.lock-wscript',
-    '.wafpickle-N', 'node_modules', 'npm-debug.log', '.DS_Store',
-    '.npmrc', 'config.gypi', '*.orig', 'package-lock.json',
+  ignore: [
+    // These are mostly npm's hard ignores
+    // https://docs.npmjs.com/misc/developers#keeping-files-out-of-your-package
+    '.cootignore', '._*', '.git', 'CVS', '.svn', '.hg', '.*.swp',
+    '.lock-wscript', '.wafpickle-N', 'node_modules', 'npm-debug.log',
+    '.DS_Store', '.npmrc', 'config.gypi', '*.orig',
   ],
+  options: [],
+}
+const TEMPLATE_OPTIONS = {
+  variable: 'o',
+}
+const PROXY_TRAPS = {
+  get(target, prop) {
+    if (!target.includes(prop)) {
+      target.push(prop)
+    }
+  },
+}
+
+
+function interpolateFileStream(fileStream, options) {
+  return fileStream.pipe(template(TEMPLATE_OPTIONS, options))
 }
 
 function validateTemplatePath(path) {
@@ -43,6 +61,34 @@ function makeTemplateConfigForPath(path) {
   return Object.assign({ name }, DEFAULT_CONFIG)
 }
 
+function loadIgnores(path) {
+  return new Promise((resolve) => {
+    fs.readFile(path, 'utf8', (err, contents) => {
+      if (err) {
+        return resolve([])
+      }
+
+      let ignores = parseIgnore(contents)
+      return resolve(ignores)
+    })
+  })
+}
+
+function addOptionsToConfig(config, options) {
+  let newConfig = Object.assign({}, config)
+  newConfig.options = config.options.filter((option) => {
+    let names = [option.name, ...(option.aliases || [])]
+
+    if (option.finalName) {
+      names.push(option.finalName)
+    }
+
+    return !names.find((name) => findByName(options, name, true))
+  })
+  newConfig.options.push(...options)
+  return newConfig
+}
+
 
 class Template extends Task {
   static create(path) {
@@ -59,16 +105,40 @@ class Template extends Task {
     this.path = resolvePath(path)
   }
 
+  _extractOptions() {
+    return new Promise((resolve, reject) => {
+      let optionNames = []
+      let optionsProxy = new Proxy(optionNames, PROXY_TRAPS)
+      let fileStream = this._src()
+      interpolateFileStream(fileStream, optionsProxy)
+        .on('data', () => {})
+        .on('end', () => resolve(optionNames))
+        .on('error', reject)
+    }).then((optionNames) => {
+      return optionNames.map((name) => ({ name, inquire: true }))
+    })
+  }
+
   _prepareConfig() {
     return new Promise((resolve, reject) => {
-      let config = makeTemplateConfigForPath(this.path)
-      fillConfigWithTemplateOptions(config, this.path)
-        .then((config) => {
-          this.config = config
+      this.config = makeTemplateConfigForPath(this.path)
+      let ignoreFilePath = Path.join(this.path, IGNORE_FILE)
+
+      loadIgnores(ignoreFilePath)
+        .then((ignores) => {
+          if (ignores.length) {
+            this.config = Object.assign({}, this.config, {
+              ignore: [...this.config.ignore, ...ignores],
+            })
+          }
+
+          return this._extractOptions()
+        })
+        .then((options) => {
+          this.config = addOptionsToConfig(this.config, options)
           return super._prepareConfig()
         })
         .then(resolve, reject)
-      // TODO: load ignores from .cootignore
     })
   }
 
