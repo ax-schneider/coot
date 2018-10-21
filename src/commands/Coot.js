@@ -2,6 +2,7 @@
 
 const pkg = require('../../package.json')
 const { inquire } = require('../utils/inquire')
+const Coot = require('../Coot')
 const Command = require('./Command')
 const I = require('./I')
 const G = require('./G')
@@ -24,10 +25,19 @@ class CootCommand extends Command {
   }
 
   _handle(options, ...args) {
-    let promise = args.length ? Promise.resolve('g') : this._inquireForCommand()
-    return promise.then((command) => {
-      return this._runSubcommand(command, options, ...args)
-    })
+    return Coot.load(options.cwd)
+      .then((coot) => {
+        this.coot = coot
+
+        if (args.length) {
+          return 'g'
+        } else {
+          return this._inquireForCommand()
+        }
+      })
+      .then((command) => {
+        return this._runSubcommand(command, options, ...args)
+      })
   }
 }
 

@@ -1,17 +1,14 @@
 /* eslint-disable no-console */
 
 const CootCommand = require('./commands/Coot')
-const Coot = require('./Coot')
 
 
 console.log()
-Coot.load(process.cwd())
-  .then((coot) => {
-    return CootCommand.create(coot)
-  })
+CootCommand.create()
   .then((command) => {
-    return command.run(null, ...process.argv.slice(2))
+    return command.run({ cwd: process.cwd() }, ...process.argv.slice(2))
   })
+  // Return the error to pass it to the next then() as a result
   .then(() => {}, (err) => err)
   .then((result) => {
     if (result) {
