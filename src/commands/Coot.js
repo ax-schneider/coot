@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
 const pkg = require('../../package.json')
+const { resolvePath } = require('../utils/common')
 const { inquire } = require('../utils/inquire')
 const Coot = require('../Coot')
 const Command = require('./Command')
@@ -25,7 +26,8 @@ class CootCommand extends Command {
   }
 
   _handle(options, ...args) {
-    return Coot.load(options.cwd)
+    let path = resolvePath(options.cwd, options.c)
+    return Coot.load(path)
       .then((coot) => {
         this.coot = coot
 
@@ -57,6 +59,10 @@ CootCommand.config = {
     'Execute a command:',
     '  coot <command> [options]',
   ],
+  options: [{
+    name: 'c',
+    description: 'Path to the config file',
+  }],
 }
 
 
