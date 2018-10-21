@@ -12,7 +12,6 @@ class CliTemplate extends Template {
   }
 
   _prepareOptions(options, ...args) {
-    // console.log(options)
     return new Promise((resolve, reject) => {
       let optionConfigs = this.config.options.filter((config) => {
         let { inquire, name, finalName } = config

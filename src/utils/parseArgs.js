@@ -13,7 +13,7 @@ function parseOption(option) {
   return { name, value }
 }
 
-function parseArgs(config, args) {
+module.exports = function parseArgs(config, args) {
   let commandNames = config.commands.map((c) => c.name)
   let positionals = config.options.filter((o) => o.positional)
   let restArgs = [...args]
@@ -40,6 +40,3 @@ function parseArgs(config, args) {
 
   return { restArgs, options, command }
 }
-
-
-module.exports = parseArgs

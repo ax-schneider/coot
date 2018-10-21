@@ -34,7 +34,7 @@ function normalizeOption({ name, value, config = {} }) {
   return { name, value }
 }
 
-function normalizeOptions(optionConfigs, options = {}) {
+module.exports = function normalizeOptions(optionConfigs, options = {}) {
   let passedOptions = Object.keys(options).map((name) => {
     let value = options[name]
     let config = findByName(optionConfigs, name, true)
@@ -56,6 +56,3 @@ function normalizeOptions(optionConfigs, options = {}) {
     return results
   }, {})
 }
-
-
-module.exports = normalizeOptions
