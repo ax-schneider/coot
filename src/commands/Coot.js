@@ -48,7 +48,7 @@ CootCommand.config = {
   version: pkg.version,
   defaultCommand: 'g',
   usage: [
-    'Show a list of the installed templates:',
+    'Show a list of the available commands:',
     '  coot',
     '',
     'Generate a template:',
