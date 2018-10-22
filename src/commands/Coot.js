@@ -25,24 +25,32 @@ class CootCommand extends Command {
     }).then((answer) => answer.command)
   }
 
+  _tap(options, ...args) {
+    return new Promise((resolve, reject) => {
+      let path = resolvePath(options.cwd, options.c)
+      Coot.load(path)
+        .then((coot) => {
+          this.coot = coot
+          return super._tap(options, ...args)
+        })
+        .then(resolve, reject)
+    })
+  }
+
   _handle(options, ...args) {
-    let path = resolvePath(options.cwd, options.c)
-    return Coot.load(path)
-      .then((coot) => {
-        this.coot = coot
+    return new Promise((resolve) => {
+      console.log(`Coot [${this.coot.configPath}]`)
+      console.log()
 
-        console.log(`Coot [${coot.configPath}]`)
-        console.log()
-
-        if (args.length) {
-          return 'g'
-        } else {
-          return this._inquireForCommand()
-        }
-      })
-      .then((command) => {
-        return this._runSubcommand(command, options, ...args)
-      })
+      if (args.length) {
+        resolve('g')
+      } else {
+        let result = this._inquireForCommand()
+        resolve(result)
+      }
+    }).then((command) => {
+      return this._runSubcommand(command, options, ...args)
+    })
   }
 }
 

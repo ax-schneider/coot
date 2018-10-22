@@ -27,6 +27,10 @@ class Command extends Task {
     return super._prepareConfig()
   }
 
+  _tap(options) {
+    return Promise.resolve(options)
+  }
+
   _handleHelp() {
     /* eslint-disable no-console */
     let help = makeHelp(this.config)
@@ -61,6 +65,7 @@ class Command extends Task {
       let compositeOptions = Object.assign({}, argOptions, taskOptions)
 
       return this._prepareOptions(compositeOptions, ...restArgs)
+        .then((options) => this._tap(options, ...restArgs))
         .then(
           (options) => {
             if (options.help) {
