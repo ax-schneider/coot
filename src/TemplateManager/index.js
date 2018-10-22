@@ -78,6 +78,18 @@ class TemplateManager {
     this.config = config
   }
 
+  getDirNameForTemplateId(id) {
+    let type = determineIdType(id)
+
+    if (type === 'git') {
+      return getNameFromGitUrl(id)
+    } else if (type === 'name') {
+      return id
+    } else {
+      return Path.basename(id)
+    }
+  }
+
   loadTemplate(id) {
     return resolveTemplateId(this.config.templatesDir, id)
       .then(

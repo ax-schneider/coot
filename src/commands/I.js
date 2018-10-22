@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const { inquireForOptions } = require('../utils/inquire')
+const { inquireForOption } = require('../utils/inquire')
 const Command = require('./Command')
 
 
@@ -11,12 +11,25 @@ class ICommand extends Command {
         return resolve(options)
       }
 
-      let optionConfigs = this.config.options.filter(({ name }) => {
-        return name === 'template_id' || name === 'template_name'
+      let templateIdConfig = this.config.options.find(({ name }) => {
+        return name === 'template_id'
+      })
+      let templateNameConfig = this.config.options.find(({ name }) => {
+        return name === 'template_name'
       })
 
-      // TODO: derive the default templateName from templateId
-      inquireForOptions(optionConfigs)
+      // It could be simplified by using inquireForOptions,
+      // but we need to derive the default value for the second question
+      inquireForOption(templateIdConfig)
+        .then((templateId) => {
+          let defaultName = this.coot.getDirNameForTemplateId(templateId)
+          templateNameConfig = Object.assign({}, templateNameConfig)
+          templateNameConfig.defaultValue = defaultName
+
+          return inquireForOption(templateNameConfig).then((templateName) => {
+            return { templateId, templateName }
+          })
+        })
         .then((answers) => Object.assign({}, options, answers))
         .then(resolve, reject)
     }).then((options) => super._prepareOptions(options, ...args))
