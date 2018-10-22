@@ -24,7 +24,11 @@ class GCommand extends Command {
         // eslint-disable-next-line camelcase
         .then((template_id) => Object.assign({}, options, { template_id }))
         .then(resolve, reject)
-    }).then((options) => super._prepareOptions(options, ...args))
+    }).then((options) => {
+      let configOptions = this.coot.getConfig().options || {}
+      options = Object.assign({}, configOptions, options)
+      return super._prepareOptions(options, ...args)
+    })
   }
 
   _handleHelp(options, ...args) {
