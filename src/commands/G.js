@@ -44,7 +44,7 @@ class GCommand extends Command {
         }
 
         return this.constructor.create(this.coot)
-          .then((generate) => generate.run(null, ...args))
+          .then((generate) => generate.run(options, ...args))
       })
   }
 }

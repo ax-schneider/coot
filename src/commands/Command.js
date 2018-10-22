@@ -62,7 +62,7 @@ class Command extends Task {
       let {
         options: argOptions, restArgs, command,
       } = parseArgs(this.config, args)
-      let compositeOptions = Object.assign({}, argOptions, taskOptions)
+      let compositeOptions = Object.assign({}, taskOptions, argOptions)
 
       return this._prepareOptions(compositeOptions, ...restArgs)
         .then((options) => this._tap(options, ...restArgs))
