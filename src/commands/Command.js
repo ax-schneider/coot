@@ -60,7 +60,7 @@ class Command extends Task {
       } = parseArgs(this.config, args)
       let compositeOptions = Object.assign({}, argOptions, taskOptions)
 
-      return this._prepareOptions(compositeOptions, ...args)
+      return this._prepareOptions(compositeOptions, ...restArgs)
         .then(
           (options) => {
             if (options.help) {

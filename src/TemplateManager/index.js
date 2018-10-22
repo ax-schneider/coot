@@ -35,12 +35,12 @@ function getNameFromGitUrl(url) {
   return matches[6]
 }
 
-function downloadFromGit(dir, src) {
+function downloadFromGit(dir, id) {
   return new Promise((resolve, reject) => {
-    let dest = Path.join(dir, getNameFromGitUrl(src))
-    src = normalizeGitUrl(src)
+    let dest = Path.join(dir, getNameFromGitUrl(id))
+    id = normalizeGitUrl(id)
 
-    return downloadGitRepo(src, dest, (err) => {
+    return downloadGitRepo(id, dest, (err) => {
       return err ? reject(err) : resolve(dest)
     })
   })

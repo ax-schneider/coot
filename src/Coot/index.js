@@ -19,6 +19,7 @@ class Coot {
     return ConfigManager.load(this.path)
       .then((configManager) => {
         this.configManager = configManager
+        this.configPath = configManager.path
         this.templateManager = new TemplateManager(this.getConfig())
         return this
       })

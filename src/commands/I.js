@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 
 const { inquireForOptions } = require('../utils/inquire')
-const Coot = require('../Coot')
 const Command = require('./Command')
 
 
@@ -24,19 +23,17 @@ class ICommand extends Command {
   }
 
   _handle({ templateId, templateName }) {
-    return Coot.load(process.cwd())
-      .then((coot) => {
-        if (templateName) {
-          console.log(`Installing ${templateId} as ${templateName}...`)
-        } else {
-          console.log(`Installing ${templateId}...`)
-        }
-        return coot.installTemplate(templateId, templateName)
-      })
-      .then(
-        (path) => path && console.log(`Installed at ${path}`),
-        (err) => console.error(err)
-      )
+    return new Promise((resolve, reject) => {
+      if (templateName) {
+        console.log(`Installing ${templateId} as ${templateName}...`)
+      } else {
+        console.log(`Installing ${templateId}...`)
+      }
+
+      this.coot.installTemplate(templateId, templateName)
+        .then((path) => path && console.log(`Installed at ${path}`))
+        .then(resolve, reject)
+    })
   }
 }
 
