@@ -7,6 +7,7 @@ const S = require('./S')
 const G = require('./G')
 const T = require('./T')
 const C = require('./C')
+const O = require('./O')
 
 
 class CootCommand extends Command {
@@ -55,7 +56,7 @@ class CootCommand extends Command {
   }
 }
 
-CootCommand.commands = [G, S, T, C]
+CootCommand.commands = [G, S, T, C, O]
 CootCommand.config = {
   name: 'coot',
   description: 'Coot',
