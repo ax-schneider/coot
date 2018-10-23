@@ -1,3 +1,6 @@
+const { resolvePath } = require('../utils/common')
+
+
 const TRUTHY_VALUES = [true, 'true', 1, '1', 'yes', 'y']
 const FALSY_VALUES = [false, 'false', 0, '0', 'no', 'n']
 
@@ -24,4 +27,12 @@ exports.number = function coerceToNumber(value) {
   }
 
   throw new Error('The value cannot be converted to a number')
+}
+
+exports.path = function coerceToPath(value) {
+  if (typeof value !== 'string') {
+    throw new Error('The value must be a string')
+  }
+
+  return resolvePath(value)
 }
