@@ -98,6 +98,12 @@ Command.baseConfig = {
     name: 'version',
     aliases: ['v'],
     description: 'Show current version',
+  }, {
+    name: 'cwd',
+    description: 'Working directory',
+    type: 'path',
+    required: true,
+    hidden: true,
   }],
 }
 

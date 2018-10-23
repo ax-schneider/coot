@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
 const { inquire } = require('../utils/inquire')
+const { resolvePath } = require('../utils/common')
 const Command = require('./Command')
 
 
@@ -26,7 +27,8 @@ class GCommand extends Command {
         .then(resolve, reject)
     }).then((options) => {
       let configOptions = this.coot.getConfig().options || {}
-      options = Object.assign({}, configOptions, options)
+      let dest = resolvePath(options.cwd, options.dest)
+      options = Object.assign({}, configOptions, options, { dest })
       return super._prepareOptions(options, ...args)
     })
   }
@@ -63,6 +65,10 @@ GCommand.config = {
     name: 'template_id',
     description: 'A local path or a git URL of the template to generate',
     positional: true,
+  }, {
+    name: 'dest',
+    description: 'Destination directory',
+    type: 'path',
   }],
 }
 

@@ -44,12 +44,6 @@ class CliTemplate extends Template {
 
       /* eslint-disable no-console */
       console.log(`Generating ${this.config.name}...`)
-
-      if (!options.dest) {
-        // TODO: add the "path" option type
-        options = Object.assign({}, options, { dest: process.cwd() })
-      }
-
       let result = super._handle(options)
       resolve(result)
     })

@@ -18,7 +18,11 @@ const DEFAULT_CONFIG = {
     '.lock-wscript', '.wafpickle-N', 'node_modules', 'npm-debug.log',
     '.DS_Store', '.npmrc', 'config.gypi', '*.orig',
   ],
-  options: [],
+  options: [{
+    name: 'dest',
+    description: 'Destination directory',
+    required: true,
+  }],
 }
 const TEMPLATE_OPTIONS = {
   variable: 'o',
