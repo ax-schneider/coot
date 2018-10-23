@@ -26,8 +26,12 @@ class Coot {
     return this.configManager.getCompiled()
   }
 
-  getDirNameForTemplateId(id) {
-    return this.templateManager.getDirNameForTemplateId(id)
+  parseTemplateId(id) {
+    return this.templateManager.parseTemplateId(id)
+  }
+
+  resolveTemplateId(id) {
+    return this.templateManager.resolveTemplateId(id)
   }
 
   loadTemplate(id) {

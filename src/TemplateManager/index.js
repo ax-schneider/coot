@@ -2,6 +2,7 @@ const Path = require('path')
 const { tmpdir } = require('os')
 const fs = require('fs-extra')
 const downloadGitRepo = require('download-git-repo')
+const parseGitUrl = require('parse-github-url')
 const { resolvePath } = require('../utils/common')
 const { inquire } = require('../utils/inquire')
 const CliTemplate = require('../templates/CliTemplate')
@@ -9,58 +10,6 @@ const CliTemplate = require('../templates/CliTemplate')
 
 const TEMP_PATH = resolvePath(tmpdir(), 'coot')
 
-
-function determineIdType(id) {
-  if (/^[a-zA-Z0-9_-\s]+$/.test(id)) {
-    return 'name'
-  } else if (/^([a-zA-Z]:|[a-zA-Z]:[/\\]|\/|\.|~).*/.test(id)) {
-    return 'path'
-  } else {
-    return 'git'
-  }
-}
-
-function normalizeGitUrl(url) {
-  // download-git-repo doesn't understand simple github urls
-  if (url.startsWith('https://github.com/')) {
-    url = url.slice(19)
-  }
-
-  return url
-}
-
-function getNameFromGitUrl(url) {
-  let regexp = /^((github|gitlab|bitbucket):)?((.+):)?([^/]+)\/([^#]+)(#(.+))?$/
-  let matches = regexp.exec(normalizeGitUrl(url))
-  return matches[6]
-}
-
-function downloadFromGit(dir, id) {
-  return new Promise((resolve, reject) => {
-    let dest = Path.join(dir, getNameFromGitUrl(id))
-    id = normalizeGitUrl(id)
-
-    return downloadGitRepo(id, dest, (err) => {
-      return err ? reject(err) : resolve(dest)
-    })
-  })
-}
-
-
-// TEMP PATH vs TEMPLATES DIR ??
-function resolveTemplateId(dir, id) {
-  return new Promise((resolve) => {
-    let type = determineIdType(id)
-
-    if (type === 'git') {
-      return resolve(downloadFromGit(TEMP_PATH, id))
-    } else if (type === 'name') {
-      return resolve(resolvePath(dir, id))
-    } else {
-      return resolve(id)
-    }
-  })
-}
 
 function inquireForConfirmation() {
   return inquire({
@@ -78,20 +27,46 @@ class TemplateManager {
     this.config = config
   }
 
-  getDirNameForTemplateId(id) {
-    let type = determineIdType(id)
-
-    if (type === 'git') {
-      return getNameFromGitUrl(id)
-    } else if (type === 'name') {
-      return id
+  parseTemplateId(id) {
+    if (/^([a-zA-Z]:|\.\.?|~)?([/\\].*)?$/.test(id)) {
+      return { type: 'path', name: Path.basename(id), id }
+    } else if (!/[/\\]/.test(id)) {
+      return { type: 'name', name: id, id }
     } else {
-      return Path.basename(id)
+      let { name } = parseGitUrl(id)
+
+      if (!name) {
+        throw new Error(`Unable to parse Git URL ${id}`)
+      }
+
+      // download-git-repo doesn't understand regular HTTPS github urls
+      if (id.startsWith('https://github.com/')) {
+        id = id.slice(19)
+      }
+
+      return { type: 'git', name, id }
     }
   }
 
+  resolveTemplateId(templateId) {
+    return new Promise((resolve, reject) => {
+      let { type, name, id } = this.parseTemplateId(templateId)
+
+      if (type === 'git') {
+        let dest = resolvePath(TEMP_PATH, name)
+        return downloadGitRepo(id, dest, (err) => {
+          err ? reject(err) : resolve(dest)
+        })
+      } else if (type === 'name') {
+        return resolve(resolvePath(this.config.templatesDir, id))
+      } else {
+        return resolve(id)
+      }
+    })
+  }
+
   loadTemplate(id) {
-    return resolveTemplateId(this.config.templatesDir, id)
+    return this.resolveTemplateId(id)
       .then(
         (path) => {
           return CliTemplate.create(path)

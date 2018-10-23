@@ -16,11 +16,11 @@ class SCommand extends Command {
         return name === 'template_name'
       })
 
-      // It could be simplified by using inquireForOptions,
-      // but we need to derive the default value for the second question
+      // It could be simplified by using inquireForOptions
+      // if we didn't need to derive the default value for the second question
       inquireForOption(templateIdConfig)
         .then((templateId) => {
-          let defaultName = this.coot.getDirNameForTemplateId(templateId)
+          let { name: defaultName } = this.coot.parseTemplateId(templateId)
           templateNameConfig = Object.assign({}, templateNameConfig)
           templateNameConfig.defaultValue = defaultName
 
