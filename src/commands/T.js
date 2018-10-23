@@ -1,7 +1,7 @@
 const Path = require('path')
 const fs = require('fs-extra')
-const { findByName, openEditor } = require('../utils/common')
-const { inquireForOption } = require('../utils/inquire')
+const { openEditor } = require('../utils/common')
+const { inquire } = require('../utils/inquire')
 const Command = require('./Command')
 
 
@@ -12,8 +12,16 @@ class TCommand extends Command {
         return resolve(options)
       }
 
-      let optionConfig = findByName(this.config.options, 'template_name')
-      return inquireForOption(optionConfig)
+      this.coot.getSavedTemplates()
+        .then((templates) => {
+          return inquire({
+            type: 'list',
+            name: 'template',
+            message: 'Choose a template to open:',
+            choices: templates,
+            default: templates[0],
+          }).then((answer) => answer.template)
+        })
         // eslint-disable-next-line camelcase
         .then((template_name) => Object.assign({}, options, { template_name }))
         .then(resolve, reject)
