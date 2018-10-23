@@ -1,5 +1,4 @@
 const Path = require('path')
-const fs = require('fs-extra')
 const { openEditor } = require('../utils/common')
 const { inquire } = require('../utils/inquire')
 const Command = require('./Command')
@@ -30,11 +29,22 @@ class TCommand extends Command {
 
   _handle({ templateName, editor }) {
     return new Promise((resolve, reject) => {
-      let config = this.coot.getConfig()
-      let path = Path.join(config.templatesDir, templateName)
-
-      fs.ensureDirSync(path)
-      openEditor(editor || config.editor, [`"${path}"`])
+      this.coot.isTemplateSaved(templateName)
+        .then((isSaved) => {
+          if (isSaved) {
+            // eslint-disable-next-line no-console
+            console.log(`Opening ${templateName}...`)
+          } else {
+            // eslint-disable-next-line no-console
+            console.log(`Creating and opening ${templateName}...`)
+            return this.coot.createTemplate(templateName)
+          }
+        })
+        .then(() => {
+          let config = this.coot.getConfig()
+          let path = Path.join(config.templatesDir, templateName)
+          return openEditor(editor || config.editor, [`"${path}"`])
+        })
         .then(resolve, reject)
     })
   }
