@@ -1,5 +1,7 @@
 const Os = require('os')
 const Path = require('path')
+const { spawn } = require('child_process')
+const envEditor = require('env-editor')
 
 
 const HOME_DIR = Os.homedir()
@@ -55,5 +57,35 @@ function findByName(configs, name, checkAllProps) {
   })
 }
 
+function openEditor(editor = process.env.EDITOR || process.env.VISUAL, args) {
+  return new Promise((resolve, reject) => {
+    if (!editor) {
+      let err = new Error(`
+Editor is not specified. There are 3 ways you can specify an editor:
+- Provide the 'editor' option
+- Set the 'editor' setting in the config
+- Set either the $EDITOR or $VISUAL environment variable
+`)
+      return reject(err)
+    }
 
-module.exports = { resolvePath, readJson, findByName }
+    let editorObj = envEditor.get(editor)
+    let cp = spawn(editorObj.bin, args, {
+      shell: true,
+      detached: true,
+      stdio: editorObj.isTerminalEditor ? 'inherit' : 'ignore',
+    })
+
+    cp.on('error', reject)
+
+    if (editorObj.isTerminalEditor) {
+      cp.on('exit', resolve)
+    } else {
+      cp.unref()
+      resolve()
+    }
+  })
+}
+
+
+module.exports = { resolvePath, readJson, findByName, openEditor }
