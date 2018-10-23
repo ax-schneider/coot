@@ -32,15 +32,16 @@ class Command extends Task {
   }
 
   _handleHelp() {
-    /* eslint-disable no-console */
     let help = makeHelp(this.config)
+    /* eslint-disable no-console */
     console.log()
     console.log(help)
     console.log()
+    /* eslint-enable no-console */
   }
 
   _handleVersion() {
-    /* eslint-disable no-console */
+    // eslint-disable-next-line no-console
     console.log(this.config.version || '0.0.0')
   }
 
@@ -79,6 +80,7 @@ class Command extends Task {
             }
           },
           (err) => {
+            // eslint-disable-next-line no-console
             console.error(`Error: ${err.message}`)
             return this._handleHelp(null, ...restArgs)
           }

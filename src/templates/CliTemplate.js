@@ -29,11 +29,13 @@ class CliTemplate extends Template {
   }
 
   _handleHelp() {
-    /* eslint-disable no-console */
     let help = makeHelp(this.config)
+
+    /* eslint-disable no-console */
     console.log()
     console.log(help)
     console.log()
+    /* eslint-enable no-console */
   }
 
   _handle(options) {
@@ -42,7 +44,7 @@ class CliTemplate extends Template {
         return this._handleHelp()
       }
 
-      /* eslint-disable no-console */
+      // eslint-disable-next-line no-console
       console.log(`Generating ${this.config.name}...`)
       let result = super._handle(options)
       resolve(result)

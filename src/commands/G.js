@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const { inquire } = require('../utils/inquire')
 const { resolvePath } = require('../utils/common')
 const Command = require('./Command')

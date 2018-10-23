@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const pkg = require('../../package.json')
 const { resolvePath } = require('../utils/common')
 const { inquire } = require('../utils/inquire')
@@ -11,6 +9,18 @@ const T = require('./T')
 
 
 class CootCommand extends Command {
+  _tap(options, ...args) {
+    return new Promise((resolve, reject) => {
+      let path = resolvePath(options.cwd, options.c)
+      Coot.load(path)
+        .then((coot) => {
+          this.coot = coot
+          return super._tap(options, ...args)
+        })
+        .then(resolve, reject)
+    })
+  }
+
   _inquireForCommand() {
     let choices = CootCommand.commands.map((command) => {
       let { name, description } = command.config
@@ -25,22 +35,12 @@ class CootCommand extends Command {
     }).then((answer) => answer.command)
   }
 
-  _tap(options, ...args) {
-    return new Promise((resolve, reject) => {
-      let path = resolvePath(options.cwd, options.c)
-      Coot.load(path)
-        .then((coot) => {
-          this.coot = coot
-          return super._tap(options, ...args)
-        })
-        .then(resolve, reject)
-    })
-  }
-
   _handle(options, ...args) {
     return new Promise((resolve) => {
+      /* eslint-disable no-console */
       console.log(`Coot [${this.coot.configPath}]`)
       console.log()
+      /* eslint-enable no-console */
 
       if (args.length) {
         resolve('g')

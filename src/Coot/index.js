@@ -6,17 +6,14 @@ const TemplateManager = require('../TemplateManager')
 class Coot {
   static load(path) {
     return new Promise((resolve) => {
-      let coot = new this(path)
-      resolve(coot.init())
+      let coot = new this()
+      resolve(coot.init(path))
     })
   }
 
-  constructor(path) {
-    this.path = resolvePath(path)
-  }
-
-  init() {
-    return ConfigManager.load(this.path)
+  init(path) {
+    path = resolvePath(path)
+    return ConfigManager.load(path)
       .then((configManager) => {
         this.configManager = configManager
         this.configPath = configManager.path

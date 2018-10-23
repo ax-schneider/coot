@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const { inquireForOption } = require('../utils/inquire')
 const Command = require('./Command')
 
@@ -37,6 +35,7 @@ class ICommand extends Command {
 
   _handle({ templateId, templateName }) {
     return new Promise((resolve, reject) => {
+      /* eslint-disable no-console */
       if (templateName) {
         console.log(`Installing ${templateId} as ${templateName}...`)
       } else {
@@ -46,6 +45,7 @@ class ICommand extends Command {
       this.coot.installTemplate(templateId, templateName)
         .then((path) => path && console.log(`Installed at ${path}`))
         .then(resolve, reject)
+      /* eslint-enable no-console */
     })
   }
 }
