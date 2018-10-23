@@ -34,16 +34,16 @@ class Coot {
     return this.templateManager.loadTemplate(id)
   }
 
-  isTemplateInstalled(name) {
-    return this.templateManager.isTemplateInstalled(name)
+  isTemplateSaved(name) {
+    return this.templateManager.isTemplateSaved(name)
   }
 
-  getInstalledTemplates() {
-    return this.templateManager.getInstalledTemplates()
+  getSavedTemplates() {
+    return this.templateManager.getSavedTemplates()
   }
 
-  installTemplate(id, name) {
-    return this.templateManager.installTemplate(id, name)
+  saveTemplate(id, name) {
+    return this.templateManager.saveTemplate(id, name)
   }
 }
 

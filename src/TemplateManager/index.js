@@ -102,14 +102,14 @@ class TemplateManager {
       )
   }
 
-  isTemplateInstalled(name) {
+  isTemplateSaved(name) {
     return new Promise((resolve) => {
       let path = resolvePath(this.config.templatesDir, name)
       return resolve(fs.pathExists(path))
     })
   }
 
-  getInstalledTemplates() {
+  getSavedTemplates() {
     return new Promise((resolve, reject) => {
       let { templatesDir } = this.config
       fs.readdir(templatesDir, (err, entries) => {
@@ -131,7 +131,7 @@ class TemplateManager {
     })
   }
 
-  installTemplate(id, name) {
+  saveTemplate(id, name) {
     return this.loadTemplate(id)
       .then((template) => {
         let path = template.path
@@ -142,7 +142,7 @@ class TemplateManager {
           return newPath
         }
 
-        return this.isTemplateInstalled(name)
+        return this.isTemplateSaved(name)
           .then((exists) => {
             return exists ? inquireForConfirmation() : true
           })
@@ -153,8 +153,8 @@ class TemplateManager {
                 .then(() => true)
             }
           })
-          .then((installed) => {
-            return installed ? newPath : false
+          .then((saved) => {
+            return saved ? newPath : false
           })
       })
   }

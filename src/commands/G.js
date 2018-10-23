@@ -10,7 +10,7 @@ class GCommand extends Command {
         return resolve(options)
       }
 
-      this.coot.getInstalledTemplates()
+      this.coot.getSavedTemplates()
         .then((templates) => {
           return inquire({
             type: 'list',

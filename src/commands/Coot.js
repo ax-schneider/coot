@@ -3,7 +3,7 @@ const { resolvePath } = require('../utils/common')
 const { inquire } = require('../utils/inquire')
 const Coot = require('../Coot')
 const Command = require('./Command')
-const I = require('./I')
+const S = require('./S')
 const G = require('./G')
 const T = require('./T')
 
@@ -54,7 +54,7 @@ class CootCommand extends Command {
   }
 }
 
-CootCommand.commands = [G, I, T]
+CootCommand.commands = [G, S, T]
 CootCommand.config = {
   name: 'coot',
   description: 'Coot',

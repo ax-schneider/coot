@@ -2,7 +2,7 @@ const { inquireForOption } = require('../utils/inquire')
 const Command = require('./Command')
 
 
-class ICommand extends Command {
+class SCommand extends Command {
   _prepareOptions(options, ...args) {
     return new Promise((resolve, reject) => {
       if (options.template_id) {
@@ -37,26 +37,26 @@ class ICommand extends Command {
     return new Promise((resolve, reject) => {
       /* eslint-disable no-console */
       if (templateName) {
-        console.log(`Installing ${templateId} as ${templateName}...`)
+        console.log(`Saving ${templateId} as ${templateName}...`)
       } else {
-        console.log(`Installing ${templateId}...`)
+        console.log(`Saving ${templateId}...`)
       }
 
-      this.coot.installTemplate(templateId, templateName)
-        .then((path) => path && console.log(`Installed at ${path}`))
+      this.coot.saveTemplate(templateId, templateName)
+        .then((path) => path && console.log(`Saved at ${path}`))
         .then(resolve, reject)
       /* eslint-enable no-console */
     })
   }
 }
 
-ICommand.config = {
-  name: 'i',
-  description: 'Install a template to the templates dir',
-  usage: ['i <template_id> [template_name]'],
+SCommand.config = {
+  name: 's',
+  description: 'Save a template to the templates dir',
+  usage: ['s <template_id> [template_name]'],
   options: [{
     name: 'template_id',
-    description: 'A local path or a git URL of the template to be installed',
+    description: 'A local path or a git URL of the template to be saved',
     required: true,
     positional: true,
   }, {
@@ -67,4 +67,4 @@ ICommand.config = {
 }
 
 
-module.exports = ICommand
+module.exports = SCommand
