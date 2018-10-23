@@ -6,7 +6,11 @@ class CCommand extends Command {
   _handle({ editor }) {
     return new Promise((resolve, reject) => {
       let config = this.coot.getConfig()
-      openEditor(editor || config.editor, [`"${this.coot.configPath}"`])
+      let path = this.coot.configPath
+
+      // eslint-disable-next-line
+      console.log(`Opening the config at ${path}...`)
+      openEditor(editor || config.editor, [`"${path}"`])
         .then(resolve, reject)
     })
   }
