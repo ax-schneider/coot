@@ -65,6 +65,27 @@ class TemplateManager {
     })
   }
 
+  createTemplate(id) {
+    return new Promise((resolve, reject) => {
+      let { type, name } = this.parseTemplateId(id)
+
+      if (type !== 'name') {
+        throw new Error('The template id must be a valid name')
+      }
+
+      this.isTemplateSaved(name)
+        .then((isSaved) => {
+          if (isSaved) {
+            throw new Error(`Template ${id} already exists`)
+          }
+
+          let path = resolvePath(this.config.templatesDir, name)
+          return fs.mkdir(path)
+        })
+        .then((resolve, reject))
+    })
+  }
+
   loadTemplate(id) {
     return this.resolveTemplateId(id)
       .then(
@@ -77,10 +98,17 @@ class TemplateManager {
       )
   }
 
-  isTemplateSaved(name) {
+  isTemplateSaved(id) {
     return new Promise((resolve) => {
+      let { type, name } = this.parseTemplateId(id)
+
+      if (type !== 'name') {
+        throw new Error('The template id must be a valid name')
+      }
+
       let path = resolvePath(this.config.templatesDir, name)
-      return resolve(fs.pathExists(path))
+      let result = fs.pathExists(path)
+      return resolve(result)
     })
   }
 

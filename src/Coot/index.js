@@ -34,12 +34,16 @@ class Coot {
     return this.templateManager.resolveTemplateId(id)
   }
 
+  createTemplate(id) {
+    return this.templateManager.createTemplate(id)
+  }
+
   loadTemplate(id) {
     return this.templateManager.loadTemplate(id)
   }
 
-  isTemplateSaved(name) {
-    return this.templateManager.isTemplateSaved(name)
+  isTemplateSaved(id) {
+    return this.templateManager.isTemplateSaved(id)
   }
 
   getSavedTemplates() {
